@@ -203,28 +203,44 @@ a:hover{ color:var(--navy-lo); }
 @media (min-width:900px){ .hero-inner{ padding-bottom:3.25rem; } .hero .lede{ max-width:52ch; } }
 
 .trust{
+  list-style:none; padding:0; max-width:none;
   display:grid; grid-template-columns:repeat(2,1fr);
-  border-top:1px solid rgba(255,255,255,.18);
-  margin-top:2rem;
+  gap:1px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:var(--radius);
+  overflow:hidden;
+  margin:2rem 0 0;
 }
-.trust div{
-  padding:.95rem .25rem;
-  border-bottom:1px solid rgba(255,255,255,.18);
-  border-right:1px solid rgba(255,255,255,.18);
-  font-size:.88rem; color:#CBD8E8;
+.trust li{
+  margin:0; padding:1.15rem 1rem 1.25rem;
+  background:rgba(255,255,255,.018);
+  display:flex; flex-direction:column; align-items:flex-start;
+  transition:background .18s ease;
 }
-.trust div:nth-child(2n){ border-right:0; }
+.trust li:hover{ background:rgba(255,255,255,.055); }
+.trust li:last-child{ grid-column:1 / -1; }
+.trust-icon{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:34px; height:34px; margin-bottom:.7rem;
+  border-radius:8px;
+  background:rgba(229,161,28,.14);
+  color:var(--brass-lo);
+}
+.trust-icon svg{ width:19px; height:19px; }
 .trust strong{
-  display:block; color:var(--brass-lo); font-family:var(--font-display);
-  font-size:clamp(.92rem, 1.5vw, 1.08rem); letter-spacing:-.01em;
-  margin-bottom:.15rem; white-space:nowrap;
+  display:block; color:#fff; font-family:var(--font-display);
+  font-size:1.02rem; letter-spacing:-.012em; line-height:1.2;
+  margin-bottom:.2rem;
 }
+.trust-label{ color:#93A7BF; font-size:.86rem; line-height:1.4; margin-top:auto; padding-top:.15rem; }
+
 @media (min-width:760px){
   .hero{ padding-top:4.5rem; }
   .trust{ grid-template-columns:repeat(5,1fr); }
-  .trust div{ border-bottom:0; padding-block:1rem; }
-  .trust div:nth-child(2n){ border-right:1px solid rgba(255,255,255,.18); }
-  .trust div:last-child{ border-right:0; }
+  .trust li:last-child{ grid-column:auto; }
+  .trust li{ padding:1.35rem 1.15rem 1.45rem; }
+  .trust strong{ font-size:1.05rem; }
 }
 
 /* Page banner (interior pages) */

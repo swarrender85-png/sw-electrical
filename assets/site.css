@@ -337,6 +337,29 @@ a:hover{ color:var(--navy-lo); }
 .faq details[open] summary::after{ content:"–"; }
 .faq details p{ margin:0 0 1.1rem; color:var(--slate); }
 
+/* Grouped FAQs — themed columns so a long list scans as short ones */
+.faq-groups{ max-width:none; }
+@media (min-width:900px){
+  .faq-groups{ column-count:2; column-gap:3.25rem; }
+}
+.faq-group{
+  min-width:0;
+  break-inside:avoid; -webkit-column-break-inside:avoid; page-break-inside:avoid;
+  margin-bottom:2.25rem;
+}
+.faq-group:last-child{ margin-bottom:0; }
+.faq-group-title{
+  font-size:.8rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--slate); margin:0 0 .35rem;
+  display:flex; align-items:center; gap:.65rem;
+}
+.faq-group-title::after{
+  content:""; flex:1; height:1px; background:var(--line);
+}
+.faq-group .faq{ border-top:0; }
+.faq-group .faq summary{ font-size:1rem; padding:.9rem .5rem .9rem 0; }
+.faq-group .faq details p{ font-size:.95rem; }
+
 /* Forms */
 .form{ background:var(--white); border:1px solid var(--line); border-radius:var(--radius); padding:1.5rem; }
 .field{ margin-bottom:1.15rem; }

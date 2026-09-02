@@ -313,8 +313,6 @@ a:hover{ color:var(--navy-lo); }
   border:1px solid var(--line); border-radius:var(--radius);
   overflow:hidden; background:#EFECE5; width:100%;
 }
-.coverage-map .leaflet-control-attribution{ font-size:.7rem; }
-.coverage-map .leaflet-popup-content{ font-family:var(--font-body); font-size:.92rem; }
 .towns{ list-style:none; padding:0; display:flex; flex-wrap:wrap; gap:.5rem; max-width:none; }
 .towns li{
   margin:0; background:var(--white); border:1px solid var(--line);

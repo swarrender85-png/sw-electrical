@@ -27,5 +27,10 @@ window.SW_CONFIG = {
   googleReviewUrl: "",
 
   // Facebook page URL, or blank to hide the link
-  facebook: ""
+  facebook: "",
+
+  // Google Maps JavaScript API key, restricted to this domain in the
+  // Google Cloud console (Credentials > this key > Application restrictions).
+  // Safe to have visible here — the restriction is what protects it, not secrecy.
+  googleMapsApiKey: "AIzaSyA1hVko9pO2E4ktL6TYImUlYcjKkHP8MAg"
 };

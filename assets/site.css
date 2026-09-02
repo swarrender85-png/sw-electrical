@@ -366,25 +366,48 @@ a:hover{ color:var(--navy-lo); }
 .contact-list strong{ display:block; font-family:var(--font-display); color:var(--navy); }
 .contact-list span{ color:var(--slate); font-size:.95rem; }
 
-/* Accreditation badges */
-.accreditations{
-  display:flex; align-items:center; flex-wrap:wrap;
-  gap:1.75rem 2.5rem;
-  padding:1.5rem 0;
-  margin:1.75rem 0;
-  border-block:1px solid var(--line);
+/* Accreditation panel */
+.credentials{
+  background:linear-gradient(165deg, #163258 0%, #12294A 55%, #0E2140 100%);
+  border-radius:var(--radius);
+  padding:1.6rem 1.4rem;
+  margin:2rem 0 2.25rem;
+  position:relative;
+  overflow:hidden;
 }
-.accreditations img{
-  height:auto; width:auto;
-  max-height:52px; max-width:190px;
-  object-fit:contain;
+.credentials::before{
+  content:""; position:absolute; inset:0 auto 0 0; width:3px;
+  background:var(--brass);
 }
-.accreditations img:last-child{ max-height:60px; max-width:110px; }
-@media (min-width:600px){
-  .accreditations{ gap:1.75rem 3rem; }
-  .accreditations img{ max-height:60px; max-width:230px; }
-  .accreditations img:last-child{ max-height:70px; max-width:125px; }
+.credentials-eyebrow{
+  display:flex; align-items:center; gap:.6rem;
+  color:var(--brass-lo); font-weight:650; font-size:.82rem;
+  letter-spacing:.09em; text-transform:uppercase;
+  margin:0 0 1.25rem;
 }
+.credentials-eyebrow::after{
+  content:""; flex:1; height:1px; background:rgba(255,255,255,.16);
+}
+.credentials-grid{ display:grid; gap:1.4rem; }
+@media (min-width:680px){
+  .credentials{ padding:1.9rem 1.8rem; }
+  .credentials-grid{ gap:1.6rem; }
+}
+.credential{ display:flex; align-items:center; gap:1.15rem; }
+@media (max-width:559px){
+  .credential{ flex-direction:column; align-items:flex-start; gap:.85rem; }
+}
+.credential-badge{
+  flex:none; display:flex; align-items:center; justify-content:center;
+  background:#fff; border-radius:6px; padding:.55rem .6rem;
+  width:120px; height:68px;
+}
+.credential-badge img{ max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; }
+.credential strong{
+  display:block; color:#fff; font-family:var(--font-display);
+  font-size:1rem; letter-spacing:-.01em; margin-bottom:.2rem;
+}
+.credential span{ color:#A9BBD0; font-size:.9rem; line-height:1.5; display:block; }
 
 .notice{
   border-left:4px solid var(--brass); background:var(--white);

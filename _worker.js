@@ -15,8 +15,8 @@
  *
  * VARIABLES — Pages > Settings > Variables and secrets
  *   RESEND_API_KEY   Resend API key                     (Secret)
- *   FROM_EMAIL       website@sw-electrical.net          (Text)
- *   TO_EMAIL         info@sw-electrical.net             (Text)
+ *   FROM_EMAIL       website@swelectrical.co.uk         (Text)
+ *   TO_EMAIL         info@swelectrical.co.uk            (Text)
  *   ADMIN_SECRET     a long random string you invent    (Secret)
  *
  * Redeploy after adding bindings or variables.
@@ -145,7 +145,7 @@ async function sendEmail(env, r) {
       <p style="margin-top:22px">
         <a href="tel:${esc(r.phone)}" style="background:#12294A;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">Call ${esc(r.name)}</a>
       </p>
-      <p style="color:#4B5B70;font-size:13px;margin-top:22px">Sent from sw-electrical.net. Also saved to the enquiry log.</p>
+      <p style="color:#4B5B70;font-size:13px;margin-top:22px">Sent from swelectrical.co.uk. Also saved to the enquiry log.</p>
     </div>`;
 
   try {

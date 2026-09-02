@@ -39,7 +39,7 @@ Add it to **both** Production and Preview if you use preview deployments.
 ## 2. Resend, for the email (about 10 minutes, mostly DNS)
 
 1. Sign up at resend.com. Free tier is 3,000 emails a month.
-2. **Domains → Add domain →** `sw-electrical.net`.
+2. **Domains → Add domain →** `swelectrical.co.uk`.
 3. Add the DNS records it gives you (DKIM, SPF, return-path) in Cloudflare DNS. Set them to **DNS only**, grey cloud, not proxied.
 4. Wait for Verified.
 5. **API Keys → Create.** Copy it once, it is not shown again.
@@ -55,8 +55,8 @@ Mail from a verified domain reaches the inbox. Mail from an unverified sender go
 | Name | Value | Type |
 |---|---|---|
 | `RESEND_API_KEY` | key from step 2 | Secret |
-| `FROM_EMAIL` | `website@sw-electrical.net` | Text |
-| `TO_EMAIL` | `info@sw-electrical.net` | Text |
+| `FROM_EMAIL` | `website@swelectrical.co.uk` | Text |
+| `TO_EMAIL` | `info@swelectrical.co.uk` | Text |
 | `ADMIN_SECRET` | a long random string you invent | Secret |
 
 Keep `FROM_EMAIL` different from `TO_EMAIL`. Sending and receiving on the same address causes filtering problems.
@@ -73,7 +73,7 @@ Keep `FROM_EMAIL` different from `TO_EMAIL`. Sending and receiving on the same a
    - **Cloudflare dashboard → Storage & Databases → D1 → sw-electrical → Console**, run `SELECT * FROM enquiries ORDER BY created_at DESC;`
    - or hit the JSON endpoint:
      ```
-     curl https://sw-electrical.net/api/enquiries -H "x-admin-secret: YOUR_ADMIN_SECRET"
+     curl https://swelectrical.co.uk/api/enquiries -H "x-admin-secret: YOUR_ADMIN_SECRET"
      ```
 
 **Reading the result:**
@@ -89,7 +89,7 @@ Keep `FROM_EMAIL` different from `TO_EMAIL`. Sending and receiving on the same a
 
 ## Changing the recipient later
 
-Edit `TO_EMAIL` in Pages and redeploy. The address also appears on the contact page, in the footer and in the schema markup, so those need a find-and-replace for `info@sw-electrical.net` at the same time.
+Edit `TO_EMAIL` in Pages and redeploy. The address also appears on the contact page, in the footer and in the schema markup, so those need a find-and-replace for `info@swelectrical.co.uk` at the same time.
 
 ---
 

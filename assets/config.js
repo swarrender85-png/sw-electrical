@@ -20,7 +20,7 @@ window.SW_CONFIG = {
   whatsappMessage: "Hi Sean, I'd like a quote for some electrical work.",
 
   // Email address enquiries should reach
-  email: "info@sw-electrical.net",
+  email: "info@swelectrical.co.uk",
 
   // Google review link (from Google Business Profile > Ask for reviews).
   // Leave blank until the profile is live and the reviews section stays hidden.

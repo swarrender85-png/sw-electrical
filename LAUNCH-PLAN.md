@@ -181,7 +181,7 @@ If you later want them pulling in automatically, the Google Places API returns u
 ## 7. Staged launch plan
 
 **Stage 1: launch (this build)**
-Electrical and EV services live. Air conditioning clearly marked coming soon. Placeholder galleries and review slots visible but honest. Contact details filled in, form connected, domain pointed at Cloudflare Pages, `sw-electrical.net` set as the primary with the old host retired and 301s in place if any old URLs had traffic. Submit the sitemap in Google Search Console and Bing Webmaster Tools.
+Electrical and EV services live. Air conditioning clearly marked coming soon. Placeholder galleries and review slots visible but honest. Contact details filled in, form connected, domain pointed at Cloudflare Pages, `swelectrical.co.uk` set as the primary with the old host retired and 301s in place if any old URLs had traffic. Submit the sitemap in Google Search Console and Bing Webmaster Tools.
 
 **Stage 2: weeks 1 to 8, credibility**
 Google Business Profile verified and populated. Reviews requested on every completed job. Photos collected and dropped into the gallery slots, replacing the placeholder blocks. First real review quotes onto the home page. Add the About photo. This stage moves the needle more than any further design work.

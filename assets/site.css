@@ -243,12 +243,13 @@ a:hover{ color:var(--navy-lo); }
   .hero{ padding-top:4.5rem; }
   .trust{ grid-template-columns:repeat(5,1fr); }
   .trust li{
-    display:flex; flex-direction:column; align-items:flex-start;
-    padding:1.35rem 1.15rem 1.4rem;
+    display:flex; flex-direction:column; align-items:center;
+    text-align:center;
+    padding:1.4rem 1rem 1.45rem;
   }
-  .trust-icon{ margin-bottom:.7rem; }
+  .trust-icon{ margin-bottom:.75rem; }
   .trust strong{ font-size:1.05rem; }
-  .trust-label{ margin-top:auto; padding-top:.15rem; }
+  .trust-label{ margin-top:auto; padding-top:.3rem; }
 }
 
 /* Page banner (interior pages) */

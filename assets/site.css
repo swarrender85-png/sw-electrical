@@ -366,6 +366,26 @@ a:hover{ color:var(--navy-lo); }
 .contact-list strong{ display:block; font-family:var(--font-display); color:var(--navy); }
 .contact-list span{ color:var(--slate); font-size:.95rem; }
 
+/* Accreditation badges */
+.accreditations{
+  display:flex; align-items:center; flex-wrap:wrap;
+  gap:1.75rem 2.5rem;
+  padding:1.5rem 0;
+  margin:1.75rem 0;
+  border-block:1px solid var(--line);
+}
+.accreditations img{
+  height:auto; width:auto;
+  max-height:52px; max-width:190px;
+  object-fit:contain;
+}
+.accreditations img:last-child{ max-height:60px; max-width:110px; }
+@media (min-width:600px){
+  .accreditations{ gap:1.75rem 3rem; }
+  .accreditations img{ max-height:60px; max-width:230px; }
+  .accreditations img:last-child{ max-height:70px; max-width:125px; }
+}
+
 .notice{
   border-left:4px solid var(--brass); background:var(--white);
   border:1px solid var(--line); border-left:4px solid var(--brass);

@@ -79,7 +79,11 @@ a:hover{ color:var(--navy-lo); }
 .skip:focus{ left:.5rem; top:.5rem; }
 
 .wrap{ width:100%; max-width:var(--max); margin-inline:auto; padding-inline:var(--gutter); }
-.narrow{ max-width:46rem; }
+/* .narrow caps reading width WITHOUT re-centering the box itself, so a
+   narrow section's left edge always lines up with every other .wrap
+   section on the page. Only the direct children get the narrower measure. */
+.narrow{ max-width:var(--max); }
+.narrow > *{ max-width:46rem; }
 
 /* ---------- Header ---------- */
 .site-head{

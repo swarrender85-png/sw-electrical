@@ -51,6 +51,18 @@
     });
   }
 
+  /* ---------- Cloudflare Web Analytics ----------
+     Cookie-free by design, so this needs no consent banner. Loaded last and
+     async so it never delays the page. Disabled simply by leaving the token
+     blank in config.js. */
+  if (c.cloudflareAnalyticsToken) {
+    var beacon = document.createElement('script');
+    beacon.defer = true;
+    beacon.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+    beacon.setAttribute('data-cf-beacon', JSON.stringify({ token: c.cloudflareAnalyticsToken }));
+    document.head.appendChild(beacon);
+  }
+
   /* ---------- Enquiry form ---------- */
   var form = document.getElementById('enquiry-form');
   if (!form) return;

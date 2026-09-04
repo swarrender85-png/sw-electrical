@@ -32,5 +32,12 @@ window.SW_CONFIG = {
   // Google Maps JavaScript API key, restricted to this domain in the
   // Google Cloud console (Credentials > this key > Application restrictions).
   // Safe to have visible here — the restriction is what protects it, not secrecy.
-  googleMapsApiKey: "AIzaSyA1hVko9pO2E4ktL6TYImUlYcjKkHP8MAg"
+  googleMapsApiKey: "AIzaSyA1hVko9pO2E4ktL6TYImUlYcjKkHP8MAg",
+
+  // ---- Cloudflare Web Analytics ----
+  // Cookie-free, so no consent banner is needed. Paste the beacon token from
+  // Cloudflare dashboard > Analytics & Logs > Web Analytics > your site >
+  // Manage site > JS snippet. It looks like a long hex string.
+  // Leave blank to disable analytics entirely.
+  cloudflareAnalyticsToken: ""
 };

@@ -530,7 +530,7 @@ a:hover{ color:var(--navy-lo); }
 .photo-slot-icon svg{ width:100%; height:100%; }
 /* Grows to fill the remaining height in the card, so the button lines up
    across a row regardless of how long each slot's description text is. */
-.photo-slot-text{ display:flex; flex-direction:column; flex:1; }
+.photo-slot-text{ display:flex; flex-direction:column; flex:1; min-height:0; }
 .photo-slot-text h3{ font-size:.98rem; margin-bottom:.3rem; }
 .photo-slot-text p{ color:var(--slate); font-size:.88rem; margin-bottom:.75rem; flex:1; }
 .photo-slot-btn{
@@ -540,6 +540,35 @@ a:hover{ color:var(--navy-lo); }
 .photo-slot-btn input[type="file"]{
   position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
 }
+.photo-thumbs{
+  display:flex; flex-wrap:wrap; gap:.5rem;
+}
+.photo-thumbs:empty{ display:none; }
+.photo-thumb{
+  position:relative; width:72px; height:72px; flex:none;
+  border-radius:6px; overflow:hidden; border:1px solid var(--line);
+}
+.photo-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+.photo-thumb-remove{
+  position:absolute; top:2px; right:2px; width:20px; height:20px;
+  border-radius:50%; background:rgba(12,27,46,.75); color:#fff;
+  border:0; font-size:.9rem; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.photo-thumb-remove:hover{ background:var(--navy); }
+
+.video-slot{ margin-top:1rem; padding-top:1rem; border-top:1px dashed var(--line); }
+.video-slot-file[hidden]{ display:none; }
+.video-slot-file{
+  display:flex; align-items:center; gap:.75rem; margin-top:.6rem;
+  font-size:.9rem; color:var(--slate);
+}
+.video-remove{
+  background:none; border:1px solid var(--line); border-radius:100px;
+  padding:.25rem .7rem; font-size:.82rem; color:var(--slate); cursor:pointer;
+}
+.video-remove:hover{ border-color:#C9C4B8; color:var(--ink); }
+
 .photo-slot-filename{
   display:block; margin-top:.5rem; font-size:.82rem; color:var(--slate);
   word-break:break-word;

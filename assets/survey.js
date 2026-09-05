@@ -1,9 +1,10 @@
 /* SW Electrical — EV survey page.
-   Loaded only on ev-survey.html. Compresses photos in the browser before
-   upload (a phone photo straight off the camera can be 5-10MB; resizing to
-   a sensible max dimension keeps the upload fast on mobile data and keeps
-   the eventual email attachment size reasonable). Nothing here reads or
-   writes any personal data except what the visitor types into the form.
+   Loaded only on ev-survey.html. Photos are compressed in the browser
+   before upload (a phone photo straight off the camera can be 5-10MB;
+   resizing keeps uploads fast on mobile data). Each slot accepts multiple
+   photos, added cumulatively rather than replacing one another. The cable
+   route slot also accepts one short video, sent as-is (video can't be
+   resized in the browser the way images can).
 */
 (function () {
   'use strict';
@@ -11,16 +12,14 @@
   var form = document.getElementById('survey-form');
   if (!form) return;
 
-  var MAX_DIMENSION = 1600;   // longest edge, in pixels, after compression
+  var MAX_DIMENSION = 1600;
   var JPEG_QUALITY = 0.82;
-  var MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // hard ceiling per photo, post-compression
+  var MAX_PHOTO_BYTES = 8 * 1024 * 1024;   // per photo, post-compression
+  var MAX_PHOTOS_PER_SLOT = 6;
+  var MAX_VIDEO_BYTES = 60 * 1024 * 1024;  // raw, no client-side compression for video
 
-  var compressed = {}; // slot key -> Blob
-  var placeholderHTML = {}; // slot key -> original icon markup, for resetting after success
-
-  Array.prototype.forEach.call(document.querySelectorAll('.photo-slot-preview'), function (p) {
-    placeholderHTML[p.id] = p.innerHTML;
-  });
+  var photos = {};   // slot key -> array of { blob, url }
+  var video = {};     // slot key -> { file, name } — only 'cable_route' is used
 
   function compressImage(file) {
     return new Promise(function (resolve, reject) {
@@ -32,8 +31,7 @@
         var canvas = document.createElement('canvas');
         canvas.width = Math.round(w * scale);
         canvas.height = Math.round(h * scale);
-        var ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
         URL.revokeObjectURL(url);
         canvas.toBlob(function (blob) {
           if (!blob) return reject(new Error('Could not process image'));
@@ -48,43 +46,95 @@
     });
   }
 
+  function renderThumbs(slot) {
+    var wrap = document.getElementById('thumbs-' + slot);
+    wrap.innerHTML = '';
+    (photos[slot] || []).forEach(function (entry, index) {
+      var thumb = document.createElement('div');
+      thumb.className = 'photo-thumb';
+      var img = document.createElement('img');
+      img.src = entry.url;
+      img.alt = '';
+      var remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'photo-thumb-remove';
+      remove.setAttribute('aria-label', 'Remove this photo');
+      remove.textContent = '\u00D7';
+      remove.addEventListener('click', function () {
+        URL.revokeObjectURL(entry.url);
+        photos[slot].splice(index, 1);
+        renderThumbs(slot);
+        updateFilenameText(slot);
+      });
+      thumb.appendChild(img);
+      thumb.appendChild(remove);
+      wrap.appendChild(thumb);
+    });
+  }
+
+  function updateFilenameText(slot) {
+    var el = document.getElementById('filename-' + slot);
+    var count = (photos[slot] || []).length;
+    el.textContent = count === 0 ? '' : count + (count === 1 ? ' photo added' : ' photos added');
+    var btnLabel = document.querySelector('[data-photo="' + slot + '"]')
+      .closest('.photo-slot-btn').querySelector('.photo-slot-btn-label');
+    btnLabel.textContent = count === 0 ? 'Choose photo' : 'Add another photo';
+  }
+
   Array.prototype.forEach.call(document.querySelectorAll('[data-photo]'), function (input) {
     var slot = input.getAttribute('data-photo');
-    var preview = document.getElementById('preview-' + slot);
-    var filenameEl = document.getElementById('filename-' + slot);
-    var btnLabel = input.closest('.photo-slot-btn').querySelector('.photo-slot-btn-label');
+    photos[slot] = photos[slot] || [];
+
+    input.addEventListener('change', function () {
+      var files = Array.prototype.slice.call(input.files || []);
+      input.value = ''; // allow re-selecting the same file later if removed
+
+      files.forEach(function (file) {
+        if ((photos[slot] || []).length >= MAX_PHOTOS_PER_SLOT) return;
+        if (file.size > 25 * 1024 * 1024) return; // implausibly large, skip quietly
+
+        compressImage(file)
+          .then(function (blob) {
+            if (blob.size > MAX_PHOTO_BYTES) return;
+            photos[slot].push({ blob: blob, url: URL.createObjectURL(blob) });
+            renderThumbs(slot);
+            updateFilenameText(slot);
+          })
+          .catch(function () { /* skip files that fail to process */ });
+      });
+    });
+  });
+
+  // Cable route's optional video field
+  Array.prototype.forEach.call(document.querySelectorAll('[data-video]'), function (input) {
+    var slot = input.getAttribute('data-video');
+    var fileRow = document.getElementById('video-file-' + slot);
+    var filenameEl = document.getElementById('video-filename-' + slot);
+    var removeBtn = document.getElementById('video-remove-' + slot);
+    var btn = input.closest('.photo-slot-btn');
 
     input.addEventListener('change', function () {
       var file = input.files && input.files[0];
       if (!file) return;
-
-      if (file.size > 25 * 1024 * 1024) {
-        filenameEl.textContent = "That file's a bit large — try a different photo.";
+      if (file.type.indexOf('video/') !== 0) { input.value = ''; return; }
+      if (file.size > MAX_VIDEO_BYTES) {
+        filenameEl.textContent = "That video's a bit large — a shorter clip works better.";
+        fileRow.hidden = false;
+        input.value = '';
         return;
       }
+      video[slot] = { file: file, name: file.name };
+      var mb = (file.size / (1024 * 1024)).toFixed(1);
+      filenameEl.textContent = file.name + ' (' + mb + ' MB)';
+      fileRow.hidden = false;
+      btn.style.display = 'none';
+    });
 
-      btnLabel.textContent = 'Processing…';
-      filenameEl.textContent = '';
-
-      compressImage(file)
-        .then(function (blob) {
-          if (blob.size > MAX_UPLOAD_BYTES) {
-            filenameEl.textContent = "Still too large after compression — try a different photo.";
-            btnLabel.textContent = 'Choose photo';
-            return;
-          }
-          compressed[slot] = blob;
-          var objectUrl = URL.createObjectURL(blob);
-          preview.innerHTML = '<img src="' + objectUrl + '" alt="">';
-          preview.classList.add('has-image');
-          var kb = Math.round(blob.size / 1024);
-          filenameEl.textContent = 'Photo added (' + kb + ' KB)';
-          btnLabel.textContent = 'Change photo';
-        })
-        .catch(function () {
-          filenameEl.textContent = "Couldn't process that photo — try again or pick another.";
-          btnLabel.textContent = 'Choose photo';
-        });
+    removeBtn.addEventListener('click', function () {
+      delete video[slot];
+      input.value = '';
+      fileRow.hidden = true;
+      btn.style.display = '';
     });
   });
 
@@ -109,9 +159,14 @@
      'parking_type', 'charger_location_notes', 'ev_status', 'preferred_time', 'notes']
       .forEach(function (key) { fd.append(key, data.get(key) || ''); });
 
-    Object.keys(compressed).forEach(function (slot) {
-      fd.append('photo_' + slot, compressed[slot], slot + '.jpg');
+    Object.keys(photos).forEach(function (slot) {
+      (photos[slot] || []).forEach(function (entry, i) {
+        fd.append('photo_' + slot, entry.blob, slot + '-' + i + '.jpg');
+      });
     });
+    if (video.cable_route) {
+      fd.append('video_cable_route', video.cable_route.file, video.cable_route.name);
+    }
 
     submit.disabled = true;
     var original = submit.textContent;
@@ -121,16 +176,18 @@
       .then(function (r) {
         if (!r.ok) throw new Error('Request failed');
         form.reset();
-        compressed = {};
-        Array.prototype.forEach.call(document.querySelectorAll('.photo-slot-preview'), function (p) {
-          p.classList.remove('has-image');
-          p.innerHTML = placeholderHTML[p.id] || '';
+        Object.keys(photos).forEach(function (slot) {
+          (photos[slot] || []).forEach(function (entry) { URL.revokeObjectURL(entry.url); });
+          photos[slot] = [];
+          renderThumbs(slot);
+          updateFilenameText(slot);
         });
-        Array.prototype.forEach.call(document.querySelectorAll('.photo-slot-btn-label'), function (l) {
-          l.textContent = 'Choose photo';
+        Object.keys(video).forEach(function (slot) { delete video[slot]; });
+        Array.prototype.forEach.call(document.querySelectorAll('.video-slot-file'), function (row) {
+          row.hidden = true;
         });
-        Array.prototype.forEach.call(document.querySelectorAll('[id^="filename-"]'), function (f) {
-          f.textContent = '';
+        Array.prototype.forEach.call(document.querySelectorAll('.video-slot .photo-slot-btn'), function (b) {
+          b.style.display = '';
         });
         say('ok', "Thanks — that's all sent through. I'll go through it and come back to you, usually within one working day.");
       })

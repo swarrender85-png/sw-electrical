@@ -533,6 +533,12 @@ a:hover{ color:var(--navy-lo); }
 .photo-slot-text{ display:flex; flex-direction:column; flex:1; min-height:0; }
 .photo-slot-text h3{ font-size:.98rem; margin-bottom:.3rem; }
 .photo-slot-text p{ color:var(--slate); font-size:.88rem; margin-bottom:.75rem; flex:1; }
+/* charger_location sits next to cable_route, which is taller because of
+   its video option. Without this, grid's default row-stretch would pull
+   charger_location's button all the way down to match that extra height,
+   leaving a large dead gap under its own short description. */
+.photo-slot[data-slot="charger_location"]{ align-self:start; }
+
 .photo-slot-btn{
   position:relative; display:inline-flex; cursor:pointer; overflow:hidden;
   align-self:flex-start; margin-top:auto;

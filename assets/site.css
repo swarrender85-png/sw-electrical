@@ -519,15 +519,43 @@ a:hover{ color:var(--navy-lo); }
 .photo-slots{ display:grid; gap:1.5rem; margin:1.25rem 0; }
 @media (min-width:640px){ .photo-slots{ grid-template-columns:1fr 1fr; } }
 .photo-slot{ display:flex; flex-direction:column; gap:.85rem; }
-.photo-slot-preview{
-  aspect-ratio:4/3; border:1px dashed #C9C4B8; border-radius:var(--radius);
-  background:#EFECE5; display:flex; align-items:center; justify-content:center;
-  overflow:hidden; flex:none;
+/* Example carousel — shows what a good photo of this thing looks like.
+   Same box size as the old static placeholder. With zero example images
+   configured it shows one honest "coming soon" slide and no controls;
+   arrows and dots appear automatically once real photos are added to
+   EXAMPLE_PHOTOS in build.py. */
+.example-carousel{
+  position:relative; aspect-ratio:4/3; border:1px solid var(--line);
+  border-radius:var(--radius); background:#EFECE5; overflow:hidden;
 }
-.photo-slot-preview.has-image{ border:1px solid var(--brass); background:none; }
-.photo-slot-preview img{ width:100%; height:100%; object-fit:cover; display:block; }
+.example-track{ position:relative; width:100%; height:100%; }
+.example-slide{
+  position:absolute; inset:0; display:none;
+  align-items:center; justify-content:center; flex-direction:column; gap:.6rem;
+}
+.example-slide.is-active{ display:flex; }
+.example-slide img{ width:100%; height:100%; object-fit:cover; }
+.example-caption{ color:var(--slate); font-size:.85rem; margin:0; }
 .photo-slot-icon{ width:40px; height:40px; color:#B5AFA0; display:block; }
 .photo-slot-icon svg{ width:100%; height:100%; }
+.example-nav{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:34px; height:34px; border-radius:50%; border:0; cursor:pointer;
+  background:rgba(12,27,46,.55); color:#fff; font-size:1.3rem; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+}
+.example-nav:hover{ background:rgba(12,27,46,.75); }
+.example-prev{ left:.6rem; }
+.example-next{ right:.6rem; }
+.example-dots{
+  position:absolute; bottom:.6rem; left:0; right:0;
+  display:flex; justify-content:center; gap:.4rem;
+}
+.example-dot{
+  width:7px; height:7px; border-radius:50%; border:0; padding:0; cursor:pointer;
+  background:rgba(255,255,255,.55);
+}
+.example-dot.is-active{ background:#fff; }
 /* Deliberately simple: no flex-grow, no stretch, no margin-top:auto.
    Each button sits directly after its own text, full stop. A previous,
    cleverer version tried to line buttons up across a row and repeatedly

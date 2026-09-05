@@ -518,19 +518,25 @@ a:hover{ color:var(--navy-lo); }
 /* Survey photo upload slots */
 .photo-slots{ display:grid; gap:1.5rem; margin:1.25rem 0; }
 @media (min-width:640px){ .photo-slots{ grid-template-columns:1fr 1fr; } }
-.photo-slot{ display:flex; flex-direction:column; gap:.85rem; }
+.photo-slot{ display:flex; flex-direction:column; gap:.85rem; height:100%; }
 .photo-slot-preview{
   aspect-ratio:4/3; border:1px dashed #C9C4B8; border-radius:var(--radius);
   background:#EFECE5; display:flex; align-items:center; justify-content:center;
-  overflow:hidden;
+  overflow:hidden; flex:none;
 }
 .photo-slot-preview.has-image{ border:1px solid var(--brass); background:none; }
 .photo-slot-preview img{ width:100%; height:100%; object-fit:cover; display:block; }
 .photo-slot-icon{ width:40px; height:40px; color:#B5AFA0; display:block; }
 .photo-slot-icon svg{ width:100%; height:100%; }
+/* Grows to fill the remaining height in the card, so the button lines up
+   across a row regardless of how long each slot's description text is. */
+.photo-slot-text{ display:flex; flex-direction:column; flex:1; }
 .photo-slot-text h3{ font-size:.98rem; margin-bottom:.3rem; }
-.photo-slot-text p{ color:var(--slate); font-size:.88rem; margin-bottom:.75rem; }
-.photo-slot-btn{ position:relative; display:inline-flex; cursor:pointer; overflow:hidden; }
+.photo-slot-text p{ color:var(--slate); font-size:.88rem; margin-bottom:.75rem; flex:1; }
+.photo-slot-btn{
+  position:relative; display:inline-flex; cursor:pointer; overflow:hidden;
+  align-self:flex-start; margin-top:auto;
+}
 .photo-slot-btn input[type="file"]{
   position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
 }

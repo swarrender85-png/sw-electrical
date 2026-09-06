@@ -651,7 +651,7 @@ a:hover{ color:var(--navy-lo); }
   @keyframes rise{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
 }
 
-.lead-in{ font-size:1.1rem; color:var(--slate); max-width:56ch; }
+.lead-in{ font-size:1.1rem; color:var(--slate); max-width:78ch; }
 .small{ font-size:.9rem; color:var(--slate); }
 .stack > * + *{ margin-top:1.5rem; }
 

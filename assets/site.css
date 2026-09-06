@@ -59,8 +59,8 @@ h1,h2,h3,h4{
 h1{ font-size:clamp(2.1rem, 6vw, 3.4rem); font-weight:700; }
 h2{ font-size:clamp(1.5rem, 3.6vw, 2.1rem); font-weight:700; }
 h3{ font-size:1.15rem; font-weight:650; }
-p{ margin:0 0 1.1em; max-width:62ch; }
-ul,ol{ max-width:62ch; }
+p{ margin:0 0 1.1em; max-width:78ch; }
+ul,ol{ max-width:78ch; }
 li{ margin-bottom:.35em; }
 
 a{ color:var(--navy); text-decoration-thickness:1px; text-underline-offset:3px; }
@@ -79,11 +79,13 @@ a:hover{ color:var(--navy-lo); }
 .skip:focus{ left:.5rem; top:.5rem; }
 
 .wrap{ width:100%; max-width:var(--max); margin-inline:auto; padding-inline:var(--gutter); }
-/* .narrow no longer constrains the container — every page now runs at the
-   same full .wrap width for visual consistency across the site. Prose still
-   gets a readable measure via the p/li rules below rather than a container
-   cap, so headings, grids, forms and buttons all span the full column. */
+/* Text-heavy pages: constrain the whole column, not just paragraphs, so
+   headings, rules, notices and body copy share one consistent measure.
+   Letting the container run full width while paragraphs stop at 62ch left
+   a large empty gutter on the right and made pages look unbalanced.
+   Wide elements (grids, carousels, maps) opt back out via .full-bleed. */
 .narrow{ max-width:var(--max); }
+.narrow p, .narrow ul, .narrow ol{ max-width:none; }
 
 /* ---------- Header ---------- */
 .site-head{

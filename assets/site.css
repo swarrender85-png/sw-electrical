@@ -556,6 +556,22 @@ a:hover{ color:var(--navy-lo); }
   background:rgba(255,255,255,.55);
 }
 .example-dot.is-active{ background:#fff; }
+
+/* Charger product carousel — reuses .example-carousel's box/nav/dots,
+   adds product framing (contain, not cover) and a name+price caption. */
+.charger-carousel{ background:var(--white); border:1px solid var(--line); aspect-ratio:auto; height:420px; }
+.charger-carousel .example-track{ height:100%; }
+.charger-carousel .example-slide{ position:static; height:100%; }
+.charger-carousel .example-slide{ padding:1.5rem 1rem 3.5rem; gap:.75rem; }
+.charger-media{ flex:1; display:flex; align-items:center; justify-content:center; min-height:0; }
+.charger-media img{ max-width:85%; max-height:100%; width:auto; height:auto; object-fit:contain; }
+.charger-info{ text-align:center; }
+.charger-info strong{ display:block; color:var(--navy); font-family:var(--font-display); font-size:1.05rem; }
+.charger-info span{ color:var(--slate); font-size:.92rem; }
+.charger-carousel .example-nav{ background:rgba(12,27,46,.35); }
+.charger-carousel .example-nav:hover{ background:rgba(12,27,46,.6); }
+.charger-carousel .example-dot{ background:#C9C4B8; }
+.charger-carousel .example-dot.is-active{ background:var(--navy); }
 /* Deliberately simple: no flex-grow, no stretch, no margin-top:auto.
    Each button sits directly after its own text, full stop. A previous,
    cleverer version tried to line buttons up across a row and repeatedly

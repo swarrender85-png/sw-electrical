@@ -1,4 +1,33 @@
 /* SW Electrical — site behaviour. No dependencies. */
+
+/* Generic carousels — the EV survey's example-photo slots and the EV
+   charging page's charger price carousel both use this. A carousel with
+   no data-count (a single "coming soon" placeholder) has nothing to wire
+   up, since there's only one slide until real content exists. */
+Array.prototype.forEach.call(document.querySelectorAll('.example-carousel[data-count]'), function (carousel) {
+  var slides = Array.prototype.slice.call(carousel.querySelectorAll('.example-slide'));
+  var dots = Array.prototype.slice.call(carousel.querySelectorAll('.example-dot'));
+  var prev = carousel.querySelector('.example-prev');
+  var next = carousel.querySelector('.example-next');
+  var index = 0;
+
+  function show(i) {
+    index = (i + slides.length) % slides.length;
+    slides.forEach(function (s, n) { s.classList.toggle('is-active', n === index); });
+    dots.forEach(function (d, n) { d.classList.toggle('is-active', n === index); });
+  }
+
+  if (prev) prev.addEventListener('click', function () { show(index - 1); });
+  if (next) next.addEventListener('click', function () { show(index + 1); });
+  dots.forEach(function (dot, i) { dot.addEventListener('click', function () { show(i); }); });
+
+  carousel.tabIndex = 0;
+  carousel.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') show(index - 1);
+    if (e.key === 'ArrowRight') show(index + 1);
+  });
+});
+
 (function () {
   'use strict';
 

@@ -12,33 +12,6 @@
   var form = document.getElementById('survey-form');
   if (!form) return;
 
-  // Example-photo carousels. No-op on the "coming soon" placeholder (a
-  // single slide, no data-count) — controls only appear once real photos
-  // exist, so there's nothing to wire up until then.
-  Array.prototype.forEach.call(document.querySelectorAll('.example-carousel[data-count]'), function (carousel) {
-    var slides = Array.prototype.slice.call(carousel.querySelectorAll('.example-slide'));
-    var dots = Array.prototype.slice.call(carousel.querySelectorAll('.example-dot'));
-    var prev = carousel.querySelector('.example-prev');
-    var next = carousel.querySelector('.example-next');
-    var index = 0;
-
-    function show(i) {
-      index = (i + slides.length) % slides.length;
-      slides.forEach(function (s, n) { s.classList.toggle('is-active', n === index); });
-      dots.forEach(function (d, n) { d.classList.toggle('is-active', n === index); });
-    }
-
-    if (prev) prev.addEventListener('click', function () { show(index - 1); });
-    if (next) next.addEventListener('click', function () { show(index + 1); });
-    dots.forEach(function (dot, i) { dot.addEventListener('click', function () { show(i); }); });
-
-    carousel.tabIndex = 0;
-    carousel.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowLeft') show(index - 1);
-      if (e.key === 'ArrowRight') show(index + 1);
-    });
-  });
-
   var MAX_DIMENSION = 1600;
   var JPEG_QUALITY = 0.82;
   var MAX_PHOTO_BYTES = 8 * 1024 * 1024;   // per photo, post-compression

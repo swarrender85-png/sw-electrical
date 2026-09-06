@@ -278,6 +278,9 @@ a:hover{ color:var(--navy-lo); }
 .section-dark a{ color:var(--brass-lo); }
 .section-head{ margin-bottom:1.75rem; padding-top:.9rem; border-top:3px solid var(--brass); display:inline-block; }
 .section-dark .section-head{ border-top-color:var(--brass); }
+/* The COMING SOON badge is styled for light backgrounds by default —
+   on a dark section it needs an inverted treatment to stay legible. */
+.section-dark .tag{ background:rgba(255,255,255,.12); color:#D9E2EE; }
 .section-head p{ color:var(--slate); }
 
 /* Service list: an index of what's covered, styled like the circuit

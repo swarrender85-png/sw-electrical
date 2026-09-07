@@ -17,7 +17,12 @@
 <link rel="icon" href="assets/logo-mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+<!-- Loaded without blocking first paint: the browser fetches this in the
+     background and swaps it in once ready, so text renders immediately in
+     a system font rather than every visitor waiting on a Google server
+     before anything appears. Meaningful mainly on throttled mobile networks. -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Inter:wght@400;500;600;700&display=swap"></noscript>
 <link rel="stylesheet" href="assets/site.css?v=58">
 <script type="application/ld+json">[{"@context":"https://schema.org","@type":"Service","serviceType":"Commercial electrical work","description":"Electrical installation, maintenance, repair, inspection and testing for commercial premises across Shropshire.","url":"https://swelectrical.co.uk/commercial-electrician.html","provider":{"@id":"https://swelectrical.co.uk/#business"},"areaServed":{"@type":"AdministrativeArea","name":"Shropshire"},"audience":{"@type":"Audience","audienceType":"Homeowners, landlords, property managers and businesses"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can you work outside our opening hours?","acceptedAnswer":{"@type":"Answer","text":"Where the job allows it, yes. Evening and weekend work can usually be arranged so the disruption lands when the premises is quiet."}},{"@type":"Question","name":"Do you take on maintenance as well as installation?","acceptedAnswer":{"@type":"Answer","text":"Yes. Ongoing maintenance, planned upgrades and reactive repairs are all part of the commercial work."}},{"@type":"Question","name":"Do you cover emergencies for businesses?","acceptedAnswer":{"@type":"Answer","text":"Yes. Emergency call-outs are available at any time, including outside the standard Monday to Friday hours."}}]}]</script>
 </head>

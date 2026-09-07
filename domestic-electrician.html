@@ -17,7 +17,12 @@
 <link rel="icon" href="assets/logo-mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+<!-- Loaded without blocking first paint: the browser fetches this in the
+     background and swaps it in once ready, so text renders immediately in
+     a system font rather than every visitor waiting on a Google server
+     before anything appears. Meaningful mainly on throttled mobile networks. -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Inter:wght@400;500;600;700&display=swap"></noscript>
 <link rel="stylesheet" href="assets/site.css?v=58">
 <script type="application/ld+json">[{"@context":"https://schema.org","@type":"Service","serviceType":"Domestic electrical work","description":"Rewires, consumer units, sockets, lighting, fault finding, inspection and testing for homes across Shropshire.","url":"https://swelectrical.co.uk/domestic-electrician.html","provider":{"@id":"https://swelectrical.co.uk/#business"},"areaServed":{"@type":"AdministrativeArea","name":"Shropshire"},"audience":{"@type":"Audience","audienceType":"Homeowners, landlords, property managers and businesses"}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Do you do small jobs?","acceptedAnswer":{"@type":"Answer","text":"Yes. Extra sockets, a light fitting, a faulty circuit, an outside socket. Small jobs are still worth doing properly."}},{"@type":"Question","name":"Can you provide a landlord's electrical report?","acceptedAnswer":{"@type":"Answer","text":"Yes. I carry out periodic inspection and testing and provide the written report, along with any remedial work needed."}},{"@type":"Question","name":"Will you make a mess?","acceptedAnswer":{"@type":"Answer","text":"Chasing walls and lifting boards is sometimes unavoidable, but dust sheets go down, mess gets cleared, and you will be told in advance if making good is needed."}}]}]</script>
 </head>

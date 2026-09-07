@@ -17,7 +17,12 @@
 <link rel="icon" href="assets/logo-mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+<!-- Loaded without blocking first paint: the browser fetches this in the
+     background and swaps it in once ready, so text renders immediately in
+     a system font rather than every visitor waiting on a Google server
+     before anything appears. Meaningful mainly on throttled mobile networks. -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Inter:wght@400;500;600;700&display=swap"></noscript>
 <link rel="stylesheet" href="assets/site.css?v=58">
 <script type="application/ld+json">[{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can I book air conditioning work now?","acceptedAnswer":{"@type":"Answer","text":"No. Air conditioning is planned but not yet offered. Nothing is being booked until the required registrations are confirmed."}},{"@type":"Question","name":"Is SW Electrical REFCOM or F-Gas registered?","acceptedAnswer":{"@type":"Answer","text":"Not currently. Those registrations are expected before any air conditioning work is offered, and this page will be updated when that is confirmed."}},{"@type":"Question","name":"What can I do in the meantime?","acceptedAnswer":{"@type":"Answer","text":"Register your interest using the contact form and mention air conditioning. I'll get in touch once the service is live."}}]}]</script>
 </head>

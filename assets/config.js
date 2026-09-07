@@ -39,7 +39,7 @@ window.SW_CONFIG = {
   // it's the secret key (kept in Pages > Variables as TURNSTILE_SECRET_KEY)
   // that must stay private. Leave blank to keep the form working without
   // Turnstile — the widget just won't render until this is filled in.
-  turnstileSiteKey: "",
+  turnstileSiteKey: "0x4AAAAAAEr9zkV950q8e3p5",
 
   // ---- Cloudflare Web Analytics ----
   // Cookie-free, so no consent banner is needed. Paste the beacon token from

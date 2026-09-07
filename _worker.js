@@ -344,6 +344,7 @@ async function handleEvSurvey(request, env, ctx) {
   const id = crypto.randomUUID();
   const photoKeysBySlot = {};   // slot -> array of R2 keys
   const mediaForEmail = [];     // { label, key, kind } — used to build view links
+  const photoUploads = [];      // in-flight R2 writes, kicked off immediately below
 
   for (const slot of SURVEY_PHOTO_SLOTS) {
     const files = form.getAll('photo_' + slot).filter((f) => typeof f !== 'string' && f.size > 0);
@@ -357,22 +358,29 @@ async function handleEvSurvey(request, env, ctx) {
         return json({ error: `A photo in ${slot} is too large` }, 400);
       }
 
-      const buffer = await file.arrayBuffer();
       const key = `ev-surveys/${id}/${slot}-${keys.length}.jpg`;
-      try {
-        await env.SURVEY_PHOTOS.put(key, buffer, { httpMetadata: { contentType: file.type } });
-      } catch {
-        return json({ error: 'Could not store a photo' }, 500);
-      }
       keys.push(key);
       mediaForEmail.push({ label: slotLabel(slot) + ` (photo ${keys.length})`, key, kind: 'photo' });
+
+      // Kicked off now, not awaited here — every photo (and the video,
+      // below) uploads to R2 concurrently rather than one at a time.
+      // Previously a survey with several photos plus a video could take
+      // several times longer than the actual network transfer needed,
+      // since each file waited for the one before it to finish writing.
+      photoUploads.push(
+        file.arrayBuffer().then((buffer) =>
+          env.SURVEY_PHOTOS.put(key, buffer, { httpMetadata: { contentType: file.type } })
+        )
+      );
     }
 
     if (keys.length) photoKeysBySlot[slot] = keys;
   }
 
-  // Cable route's optional video
+  // Cable route's optional video — validated the same way, upload kicked
+  // off alongside the photos above so it runs concurrently with them.
   let videoKey = null;
+  let videoUpload = null;
   const videoFile = form.get('video_cable_route');
   if (videoFile && typeof videoFile !== 'string' && videoFile.size > 0) {
     if (!videoFile.type || !videoFile.type.startsWith('video/')) {
@@ -381,14 +389,24 @@ async function handleEvSurvey(request, env, ctx) {
     if (videoFile.size > SURVEY_MAX_VIDEO_BYTES) {
       return json({ error: 'Cable route video is too large' }, 400);
     }
-    const buffer = await videoFile.arrayBuffer();
     videoKey = `ev-surveys/${id}/cable_route-video.mp4`;
+    mediaForEmail.push({ label: 'Cable route (video)', key: videoKey, kind: 'video' });
+    videoUpload = videoFile.arrayBuffer().then((buffer) =>
+      env.SURVEY_PHOTOS.put(videoKey, buffer, { httpMetadata: { contentType: videoFile.type } })
+    );
+  }
+
+  try {
+    await Promise.all(photoUploads);
+  } catch {
+    return json({ error: 'Could not store a photo' }, 500);
+  }
+  if (videoUpload) {
     try {
-      await env.SURVEY_PHOTOS.put(videoKey, buffer, { httpMetadata: { contentType: videoFile.type } });
+      await videoUpload;
     } catch {
       return json({ error: 'Could not store the video' }, 500);
     }
-    mediaForEmail.push({ label: 'Cable route (video)', key: videoKey, kind: 'video' });
   }
 
   try {
@@ -477,15 +495,53 @@ async function serveSurveyMedia(request, env) {
   }
 
   if (!env.SURVEY_PHOTOS) return new Response('Not found', { status: 404 });
+
+  // Range support matters most for video: without it, a player can't ask
+  // for just the bytes it needs next, so it either has to buffer the whole
+  // file before playing (choppy start, no seeking) or stalls repeatedly.
+  // head() gets the size and content-type without pulling the file body.
+  const head = await env.SURVEY_PHOTOS.head(key);
+  if (!head) return new Response('Not found', { status: 404 });
+
+  const headers = new Headers();
+  head.writeHttpMetadata(headers);
+  headers.set('accept-ranges', 'bytes');
+  headers.set('cache-control', 'private, max-age=3600');
+  if (!headers.get('content-type')) headers.set('content-type', 'application/octet-stream');
+
+  const rangeHeader = request.headers.get('range');
+  const rangeMatch = rangeHeader && /^bytes=(\d*)-(\d*)$/.exec(rangeHeader);
+
+  if (rangeMatch) {
+    const size = head.size;
+    let start = rangeMatch[1] ? parseInt(rangeMatch[1], 10) : undefined;
+    let end = rangeMatch[2] ? parseInt(rangeMatch[2], 10) : undefined;
+
+    if (start === undefined) {
+      // Suffix range, e.g. "bytes=-500" means the last 500 bytes.
+      start = Math.max(size - end, 0);
+      end = size - 1;
+    } else if (end === undefined || end >= size) {
+      end = size - 1;
+    }
+
+    if (start > end || start >= size) {
+      headers.set('content-range', `bytes */${size}`);
+      return new Response(null, { status: 416, headers });
+    }
+
+    const object = await env.SURVEY_PHOTOS.get(key, { range: { offset: start, length: end - start + 1 } });
+    if (!object) return new Response('Not found', { status: 404 });
+
+    headers.set('content-range', `bytes ${start}-${end}/${size}`);
+    headers.set('content-length', String(end - start + 1));
+    return new Response(object.body, { status: 206, headers });
+  }
+
   const object = await env.SURVEY_PHOTOS.get(key);
   if (!object) return new Response('Not found', { status: 404 });
-
-  return new Response(object.body, {
-    headers: {
-      'Content-Type': object.httpMetadata?.contentType || 'application/octet-stream',
-      'Cache-Control': 'private, max-age=3600'
-    }
-  });
+  headers.set('content-length', String(head.size));
+  return new Response(object.body, { status: 200, headers });
 }
 
 async function sendSurveyEmail(env, r) {

@@ -352,6 +352,22 @@ a:hover{ color:var(--navy-lo); }
   border:1px solid var(--line); border-radius:var(--radius);
   overflow:hidden; background:#EFECE5; width:100%;
 }
+/* Shown in place of the map when Google Maps fails to load. The section
+   must still tell a visitor the service area rather than showing a blank
+   box or Google's own grey error panel. */
+.coverage-map-fallback{
+  background:var(--white); padding:1.5rem; height:auto;
+  display:flex; flex-direction:column; justify-content:center;
+  min-height:230px; color:var(--slate); font-size:.95rem;
+}
+.coverage-map-fallback p{ margin:0 0 .75rem; max-width:none; }
+.coverage-map-fallback p:last-child{ margin-bottom:0; }
+.coverage-fallback-title{
+  font-family:var(--font-display); font-weight:700;
+  color:var(--navy); font-size:1.05rem;
+  padding-top:.6rem; border-top:3px solid var(--brass);
+  display:inline-block; align-self:flex-start;
+}
 .towns{ list-style:none; padding:0; display:flex; flex-wrap:wrap; gap:.5rem; max-width:none; }
 .towns li{
   margin:0; background:var(--white); border:1px solid var(--line);

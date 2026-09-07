@@ -28,6 +28,31 @@ Array.prototype.forEach.call(document.querySelectorAll('.example-carousel[data-c
   });
 });
 
+/* Cloudflare Turnstile — shared loader for the enquiry and EV survey forms.
+   Loads the widget script once, only when a site key is configured in
+   config.js, and only on pages that actually have a .cf-turnstile slot.
+   Left unconfigured (turnstileSiteKey blank), this is a no-op: the div
+   stays empty, no token is produced, and the worker skips verification
+   entirely since it fails open with no TURNSTILE_SECRET_KEY set. */
+var __swTurnstileLoading = false;
+function loadTurnstileIfConfigured(form) {
+  var slot = form.querySelector('.cf-turnstile');
+  var siteKey = (window.SW_CONFIG || {}).turnstileSiteKey;
+  if (!slot || !siteKey) return;
+
+  slot.setAttribute('data-sitekey', siteKey);
+
+  if (window.turnstile) { window.turnstile.render(slot); return; }
+  if (__swTurnstileLoading) return;
+  __swTurnstileLoading = true;
+
+  var script = document.createElement('script');
+  script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
+}
+
 (function () {
   'use strict';
 
@@ -98,6 +123,14 @@ Array.prototype.forEach.call(document.querySelectorAll('.example-carousel[data-c
 
   var status = document.getElementById('form-status');
   var submit = form.querySelector('button[type="submit"]');
+
+  // Time-trap: records when the form became visible, so the worker can
+  // reject anything submitted implausibly fast (a bot filling and posting
+  // a form in well under a second, before a person could have typed a word).
+  var startedField = form.querySelector('[name="form_started"]');
+  if (startedField) startedField.value = String(Date.now() / 1000);
+
+  loadTurnstileIfConfigured(form);
 
   function say(kind, msg) {
     status.className = 'form-status show ' + kind;

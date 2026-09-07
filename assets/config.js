@@ -34,6 +34,13 @@ window.SW_CONFIG = {
   // Safe to have visible here — the restriction is what protects it, not secrecy.
   googleMapsApiKey: "AIzaSyA1hVko9pO2E4ktL6TYImUlYcjKkHP8MAg",
 
+  // Cloudflare Turnstile site key (from the Cloudflare dashboard > Turnstile,
+  // NOT the Pages project). Safe to have visible here, same as the Maps key —
+  // it's the secret key (kept in Pages > Variables as TURNSTILE_SECRET_KEY)
+  // that must stay private. Leave blank to keep the form working without
+  // Turnstile — the widget just won't render until this is filled in.
+  turnstileSiteKey: "",
+
   // ---- Cloudflare Web Analytics ----
   // Cookie-free, so no consent banner is needed. Paste the beacon token from
   // Cloudflare dashboard > Analytics & Logs > Web Analytics > your site >

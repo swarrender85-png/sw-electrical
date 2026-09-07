@@ -12,6 +12,12 @@
   var form = document.getElementById('survey-form');
   if (!form) return;
 
+  // Time-trap, matches the enquiry form — see site.js for the shared rationale.
+  var startedField = form.querySelector('[name="form_started"]');
+  if (startedField) startedField.value = String(Date.now() / 1000);
+
+  if (typeof loadTurnstileIfConfigured === 'function') loadTurnstileIfConfigured(form);
+
   var MAX_DIMENSION = 1600;
   var JPEG_QUALITY = 0.82;
   var MAX_PHOTO_BYTES = 8 * 1024 * 1024;   // per photo, post-compression
@@ -156,7 +162,8 @@
     var data = new FormData(form);
     var fd = new FormData();
     ['name', 'phone', 'email', 'postcode', 'property_type', 'tenure',
-     'parking_type', 'charger_location_notes', 'ev_status', 'preferred_time', 'notes']
+     'parking_type', 'charger_location_notes', 'ev_status', 'preferred_time', 'notes',
+     'form_started', 'cf-turnstile-response']
       .forEach(function (key) { fd.append(key, data.get(key) || ''); });
 
     Object.keys(photos).forEach(function (slot) {

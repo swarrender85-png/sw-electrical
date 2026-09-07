@@ -24,10 +24,90 @@
  *   ADMIN_SECRET     a long random string you invent    (Secret)
  *                  Also used to sign the survey-media view links, so no
  *                  separate secret is needed for that.
+ *   TURNSTILE_SECRET_KEY  Cloudflare Turnstile secret key   (Secret, optional)
+ *                  Verifies the Turnstile token from the form. If this
+ *                  variable is unset, Turnstile verification is skipped
+ *                  entirely — the form keeps working, just without that
+ *                  layer, until the key is added.
  *
  * Redeploy after adding bindings or variables.
  * ---------------------------------------------------------------------------
+ *
+ * ANTI-SPAM — three independent layers, all fail open (a fault in any one
+ * never blocks a genuine enquiry from being saved):
+ *   1. Honeypot        `company` field, hidden from sighted users. Any bot
+ *                       that fills every input trips it.
+ *   2. Time-trap        `form_started` timestamp set on page load. A submit
+ *                       under MIN_FORM_SECONDS after the page loaded is
+ *                       almost certainly scripted, not typed.
+ *   3. Rate limit       max RATE_LIMIT_MAX submissions per IP per
+ *                       RATE_LIMIT_WINDOW_SECONDS, tracked in the
+ *                       form_submissions D1 table.
+ *   4. Turnstile        optional, see TURNSTILE_SECRET_KEY above.
  */
+
+const MIN_FORM_SECONDS = 3;
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_SECONDS = 60 * 60; // 1 hour
+
+/** Returns null if under the limit, or a 429 Response if the IP should be blocked. */
+async function checkRateLimit(request, env, endpoint) {
+  if (!env.DB) return null; // fail open — a missing binding must never block real enquiries
+
+  const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+  const now = Math.floor(Date.now() / 1000);
+  const windowStart = now - RATE_LIMIT_WINDOW_SECONDS;
+
+  try {
+    const { results } = await env.DB.prepare(
+      `SELECT COUNT(*) AS n FROM form_submissions WHERE ip = ? AND endpoint = ? AND created_at > ?`
+    ).bind(ip, endpoint, windowStart).all();
+
+    if ((results?.[0]?.n ?? 0) >= RATE_LIMIT_MAX) {
+      return json({ error: 'Too many submissions. Please try again later.' }, 429);
+    }
+
+    // Record this attempt even if it later fails validation — failed spam
+    // attempts should count towards the limit, not get a free retry.
+    await env.DB.prepare(
+      `INSERT INTO form_submissions (ip, endpoint, created_at) VALUES (?, ?, ?)`
+    ).bind(ip, endpoint, now).run();
+  } catch {
+    // Table missing or a transient D1 fault — fail open rather than block enquiries.
+  }
+  return null;
+}
+
+/** True if the submission arrived suspiciously fast after the form loaded. */
+function failsTimeTrap(formStarted) {
+  const started = Number(formStarted);
+  if (!started) return false; // no timestamp supplied — don't punish older clients/cached pages
+  const elapsed = Date.now() / 1000 - started;
+  return elapsed >= 0 && elapsed < MIN_FORM_SECONDS;
+}
+
+/** Verifies a Turnstile token. Returns true if Turnstile isn't configured (fail open),
+ *  or if the token checks out. Returns false only on a confirmed bad token. */
+async function verifyTurnstile(token, env, request) {
+  if (!env.TURNSTILE_SECRET_KEY) return true; // not configured yet — no-op until keys are added
+  if (!token) return false;
+
+  try {
+    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        secret: env.TURNSTILE_SECRET_KEY,
+        response: token,
+        remoteip: request.headers.get('cf-connecting-ip') || ''
+      })
+    });
+    const data = await res.json();
+    return !!data.success;
+  } catch {
+    return true; // Cloudflare's own verify endpoint being down must never block real enquiries
+  }
+}
 
 export default {
   async fetch(request, env, ctx) {
@@ -78,6 +158,9 @@ const FIELDS = {
 };
 
 async function handleEnquiry(request, env, ctx) {
+  const limited = await checkRateLimit(request, env, 'enquiry');
+  if (limited) return limited;
+
   let d;
   try {
     d = await request.json();
@@ -87,6 +170,12 @@ async function handleEnquiry(request, env, ctx) {
 
   // Honeypot: bots fill every field, people leave this one alone.
   if (d.company) return json({ ok: true }, 200);
+
+  if (failsTimeTrap(d.form_started)) return json({ ok: true }, 200);
+
+  if (!(await verifyTurnstile(d['cf-turnstile-response'], env, request))) {
+    return json({ error: 'Verification failed. Please try again.' }, 400);
+  }
 
   const clean = {};
   for (const [field, max] of Object.entries(FIELDS)) {
@@ -218,6 +307,9 @@ const SURVEY_TEXT_FIELDS = {
 };
 
 async function handleEvSurvey(request, env, ctx) {
+  const limited = await checkRateLimit(request, env, 'ev-survey');
+  if (limited) return limited;
+
   let form;
   try {
     form = await request.formData();
@@ -227,6 +319,12 @@ async function handleEvSurvey(request, env, ctx) {
 
   // Honeypot
   if (form.get('company')) return json({ ok: true }, 200);
+
+  if (failsTimeTrap(form.get('form_started'))) return json({ ok: true }, 200);
+
+  if (!(await verifyTurnstile(form.get('cf-turnstile-response'), env, request))) {
+    return json({ error: 'Verification failed. Please try again.' }, 400);
+  }
 
   const clean = {};
   for (const [field, max] of Object.entries(SURVEY_TEXT_FIELDS)) {

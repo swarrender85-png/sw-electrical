@@ -16,8 +16,8 @@
   --white:    #FFFFFF;
   --slate:    #4B5B70;   /* secondary text */
   --line:     #E3E0D9;   /* hairlines */
-  --green:    #128C7E;   /* WhatsApp action */
-  --green-lo: #0E7268;
+  --green:    #075E54;   /* WhatsApp action — WhatsApp's own darker brand teal, chosen over the brighter #128C7E for contrast: white text on that lighter green was ~4.1:1, just under the 4.5:1 WCAG AA needs */
+  --green-lo: #054F46;
 
   /* Type */
   --font-display: "Archivo", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;

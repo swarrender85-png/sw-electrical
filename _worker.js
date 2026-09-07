@@ -47,7 +47,7 @@
  */
 
 const MIN_FORM_SECONDS = 3;
-const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_MAX = 20; // TEMPORARY: raised from 5 while testing Turnstile — drop back down once confirmed working
 const RATE_LIMIT_WINDOW_SECONDS = 60 * 60; // 1 hour
 
 /** Returns null if under the limit, or a 429 Response if the IP should be blocked. */

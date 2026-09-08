@@ -205,8 +205,8 @@ a:hover{ color:var(--navy-lo); }
 }
 .hero .eyebrow::before{ content:""; width:26px; height:2px; background:var(--brass); }
 .hero p.lede{ color:#D9E2EE; font-size:1.13rem; max-width:44ch; }
-.hero-inner{ padding-bottom:2.5rem; }
-@media (min-width:900px){ .hero-inner{ padding-bottom:3.25rem; } .hero .lede{ max-width:52ch; } }
+.hero-inner{ padding-bottom:3.25rem; }
+@media (min-width:900px){ .hero-inner{ padding-bottom:4.5rem; } .hero .lede{ max-width:52ch; } }
 
 .trust{
   list-style:none; padding:0; max-width:none;

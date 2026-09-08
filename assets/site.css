@@ -201,9 +201,9 @@ a:hover{ color:var(--navy-lo); }
    only cost contrast. */
 .hero-mark{
   display:none;
-  position:absolute; right:-6%; top:50%; transform:translateY(-50%);
-  height:190%; width:auto;
-  color:#fff; opacity:.085;
+  position:absolute; right:-18%; top:50%; transform:translateY(-50%);
+  height:110%; width:auto;
+  color:#fff; opacity:.06;
   pointer-events:none; z-index:0;
 }
 @media (min-width:900px){ .hero-mark{ display:block; } }

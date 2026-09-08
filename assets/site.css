@@ -194,6 +194,19 @@ a:hover{ color:var(--navy-lo); }
   -webkit-mask-image:radial-gradient(90% 70% at 60% 30%, #000 0%, transparent 75%);
 }
 .hero .wrap{ position:relative; z-index:1; }
+/* Decorative logo mark bled off the right edge of the hero. Sits above the
+   background gradient but below the grid overlay (::before) and all content,
+   so it reads as texture rather than a second logo. Hidden below 900px:
+   the hero text runs full width on mobile, so a watermark behind it would
+   only cost contrast. */
+.hero-mark{
+  display:none;
+  position:absolute; right:-6%; top:50%; transform:translateY(-50%);
+  height:190%; width:auto;
+  color:#fff; opacity:.085;
+  pointer-events:none; z-index:0;
+}
+@media (min-width:900px){ .hero-mark{ display:block; } }
 .hero::after{
   content:""; position:absolute; inset:auto 0 0 0; height:3px;
   background:var(--brass); opacity:.85;

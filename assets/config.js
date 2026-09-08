@@ -27,7 +27,7 @@ window.SW_CONFIG = {
   googleReviewUrl: "",
 
   // Facebook page URL, or blank to hide the link
-  facebook: "",
+  facebook: "https://www.facebook.com/people/S-Warrender-Electrical/100063556210825/",
 
   // Google Maps JavaScript API key, restricted to this domain in the
   // Google Cloud console (Credentials > this key > Application restrictions).

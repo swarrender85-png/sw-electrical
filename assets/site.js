@@ -103,6 +103,9 @@ function loadTurnstileIfConfigured(form) {
       el.setAttribute('href', c.facebook);
       el.hidden = false;
     });
+    // The footer link is wrapped in an <li> that is hidden by default, so
+    // the row does not appear as an empty bullet when no URL is configured.
+    setAll('[data-facebook-item]', function (el) { el.hidden = false; });
   }
 
   /* ---------- Cloudflare Web Analytics ----------

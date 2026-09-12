@@ -403,6 +403,26 @@ a:hover{ color:var(--navy-lo); }
 .cta-band h2{ color:#fff; }
 .cta-band p{ color:#D9E2EE; max-width:52ch; }
 
+/* Homepage closing band, split by intent: someone planning work on the
+   left, someone with a live problem on the right. On mobile the columns
+   stack and the vertical divider becomes a horizontal rule. */
+.cta-split-grid{ display:grid; gap:2rem; }
+.cta-split-col h2{ font-size:1.45rem; margin:.25rem 0 .5rem; }
+.cta-split-col p{ font-size:.98rem; margin-bottom:1.1rem; }
+.cta-kicker{
+  color:var(--brass-lo); font-weight:650; font-size:.8rem;
+  letter-spacing:.06em; text-transform:uppercase; margin:0;
+}
+.cta-split-col + .cta-split-col{ border-top:1px solid rgba(255,255,255,.14); padding-top:2rem; }
+@media (min-width:760px){
+  .cta-split-grid{ grid-template-columns:1fr 1fr; gap:0; }
+  .cta-split-col{ padding-right:2.5rem; }
+  .cta-split-col + .cta-split-col{
+    border-top:0; padding-top:0; padding-right:0; padding-left:2.5rem;
+    border-left:1px solid rgba(255,255,255,.14);
+  }
+}
+
 /* FAQ */
 .faq{ border-top:1px solid var(--line); max-width:52rem; }
 .faq details{ border-bottom:1px solid var(--line); }

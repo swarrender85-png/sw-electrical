@@ -356,11 +356,22 @@ a:hover{ color:var(--navy-lo); }
 /* Coverage */
 .coverage{ display:grid; gap:1.5rem; }
 @media (min-width:820px){ .coverage{ grid-template-columns:1.1fr .9fr; align-items:start; } }
-.map-slot{
-  border:1px dashed #C9C4B8; border-radius:var(--radius); background:#EFECE5;
-  min-height:230px; display:flex; align-items:center; justify-content:center;
-  text-align:center; padding:1.5rem; color:var(--slate); font-size:.9rem;
+/* "At a glance" card on the About page. Sits in the right-hand column of
+   the .coverage grid, sticky on desktop so it stays alongside the prose. */
+.glance{
+  background:var(--white); border:1px solid var(--line); border-radius:var(--radius);
+  padding:1.35rem 1.5rem 1.5rem; align-self:start;
 }
+@media (min-width:820px){ .glance{ position:sticky; top:5.5rem; } }
+.glance-title{
+  font-family:var(--font-display); font-weight:700; font-size:1.05rem;
+  color:var(--navy); margin:0 0 1rem;
+  padding-top:.6rem; border-top:3px solid var(--brass); display:inline-block;
+}
+.glance dl{ margin:0; display:grid; gap:.85rem; }
+.glance dl > div{ margin:0; }
+.glance dt{ font-weight:650; color:var(--navy); font-size:.9rem; margin-bottom:.15rem; }
+.glance dd{ margin:0; color:var(--slate); font-size:.95rem; line-height:1.5; }
 .coverage-map{
   border:1px solid var(--line); border-radius:var(--radius);
   overflow:hidden; background:#EFECE5; width:100%;

@@ -3,6 +3,7 @@
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: SAMEORIGIN
   Permissions-Policy: geolocation=(), microphone=(), camera=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
 
 # Every asset URL carries a ?v=N query string driven by ASSET_V in build.py,
 # so a changed file is always a changed URL. That makes it safe to cache these

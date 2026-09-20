@@ -64,7 +64,7 @@ async function checkRateLimit(request, env, endpoint) {
     ).bind(ip, endpoint, windowStart).all();
 
     if ((results?.[0]?.n ?? 0) >= RATE_LIMIT_MAX) {
-      return json({ error: 'Too many submissions. Please try again later.' }, 429);
+      return json({ error: 'That is a lot of enquiries from this connection in a short time. Please wait a little while, or call Sean directly.' }, 429);
     }
 
     // Record this attempt even if it later fails validation — failed spam
@@ -148,14 +148,22 @@ function json(body, status = 200, extra = {}) {
   });
 }
 
+// field -> { max length, label shown to the customer }
 const FIELDS = {
-  name: 100,
-  phone: 40,
-  email: 200,
-  postcode: 12,
-  service: 80,
-  details: 4000
+  name:     { max: 100,  label: 'your name' },
+  phone:    { max: 40,   label: 'a phone number' },
+  email:    { max: 200,  label: 'an email address' },
+  postcode: { max: 12,   label: 'a postcode' },
+  service:  { max: 80,   label: 'the service you need' },
+  details:  { max: 4000, label: 'a short description of the work' }
 };
+
+// Deliberately loose. The job is to catch obvious mistakes (letters typed into
+// the phone box, a postcode that is clearly not one) without rejecting valid
+// entries: people write numbers with spaces, brackets, +44 prefixes, and a
+// customer fumbling their own postcode should still be able to reach Sean.
+const PHONE_OK = /^[0-9+()\s.-]{7,}$/;
+const UK_POSTCODE_OK = /^[A-Z]{1,2}[0-9][A-Z0-9]?\s*[0-9][A-Z]{2}$/i;
 
 async function handleEnquiry(request, env, ctx) {
   const limited = await checkRateLimit(request, env, 'enquiry');
@@ -174,24 +182,34 @@ async function handleEnquiry(request, env, ctx) {
   if (failsTimeTrap(d.form_started)) return json({ ok: true }, 200);
 
   if (!(await verifyTurnstile(d['cf-turnstile-response'], env, request))) {
-    return json({ error: 'Verification failed. Please try again.' }, 400);
+    return json({ error: 'The anti-spam check did not pass. Please reload the page and try again.' }, 400);
   }
 
+  // Validation messages are written to be read by the customer and to name the
+  // field, so a failed submission says what to fix instead of just failing.
   const clean = {};
-  for (const [field, max] of Object.entries(FIELDS)) {
+  for (const [field, { max, label }] of Object.entries(FIELDS)) {
     const v = String(d[field] ?? '').trim();
-    if (!v) return json({ error: `Missing ${field}` }, 400);
-    if (v.length > max) return json({ error: `${field} too long` }, 400);
+    if (!v) return json({ error: `Please enter ${label}.`, field }, 400);
+    if (v.length > max) {
+      return json({ error: `That ${label.replace(/^(your|an|a|the) /, '')} is too long. Please shorten it and try again.`, field }, 400);
+    }
     clean[field] = v;
   }
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean.email)) {
-    return json({ error: 'Invalid email' }, 400);
+    return json({ error: 'That email address does not look right. Please check it and try again.', field: 'email' }, 400);
+  }
+  if (!PHONE_OK.test(clean.phone)) {
+    return json({ error: 'That phone number does not look right. Please use digits only, for example 07968 991258.', field: 'phone' }, 400);
+  }
+  if (!UK_POSTCODE_OK.test(clean.postcode)) {
+    return json({ error: 'That postcode does not look right. Please check it, for example SY3 9NT.', field: 'postcode' }, 400);
   }
 
   const preferred = ['Phone', 'WhatsApp', 'Email'].includes(d.preferred) ? d.preferred : null;
   const id = crypto.randomUUID();
 
-  if (!env.DB) return json({ error: 'Storage not configured' }, 500);
+  if (!env.DB) return json({ error: 'Something went wrong at our end. Please call or WhatsApp Sean instead.' }, 500);
 
   try {
     await env.DB.prepare(
@@ -211,7 +229,7 @@ async function handleEnquiry(request, env, ctx) {
       )
       .run();
   } catch (err) {
-    return json({ error: 'Could not save enquiry' }, 500);
+    return json({ error: 'Something went wrong at our end saving your enquiry. Please call or WhatsApp Sean instead.' }, 500);
   }
 
   // The enquiry is saved. Email is a notification, so send it after the
@@ -281,7 +299,7 @@ async function listEnquiries(request, env) {
   if (!env.ADMIN_SECRET || request.headers.get('x-admin-secret') !== env.ADMIN_SECRET) {
     return json({ error: 'Unauthorised' }, 401);
   }
-  if (!env.DB) return json({ error: 'Storage not configured' }, 500);
+  if (!env.DB) return json({ error: 'Something went wrong at our end. Please call or WhatsApp Sean instead.' }, 500);
 
   const { results } = await env.DB.prepare(
     `SELECT id, created_at, name, phone, email, postcode, service, details,
@@ -323,7 +341,7 @@ async function handleEvSurvey(request, env, ctx) {
   if (failsTimeTrap(form.get('form_started'))) return json({ ok: true }, 200);
 
   if (!(await verifyTurnstile(form.get('cf-turnstile-response'), env, request))) {
-    return json({ error: 'Verification failed. Please try again.' }, 400);
+    return json({ error: 'The anti-spam check did not pass. Please reload the page and try again.' }, 400);
   }
 
   const clean = {};
@@ -338,7 +356,7 @@ async function handleEvSurvey(request, env, ctx) {
     return json({ error: 'Invalid email' }, 400);
   }
 
-  if (!env.DB) return json({ error: 'Storage not configured' }, 500);
+  if (!env.DB) return json({ error: 'Something went wrong at our end. Please call or WhatsApp Sean instead.' }, 500);
   if (!env.SURVEY_PHOTOS) return json({ error: 'Photo storage not configured' }, 500);
 
   const id = crypto.randomUUID();

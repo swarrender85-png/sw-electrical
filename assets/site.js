@@ -144,6 +144,7 @@ function loadTurnstileIfConfigured(form) {
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
+    setAll('[aria-invalid]', function (el) { el.removeAttribute('aria-invalid'); });
 
     // Honeypot: real people leave this empty.
     if (form.querySelector('[name="company"]').value) return;
@@ -159,12 +160,32 @@ function loadTurnstileIfConfigured(form) {
       body: JSON.stringify(data)
     })
       .then(function (r) {
-        if (!r.ok) throw new Error('Request failed');
+        // The worker explains exactly what failed (bad postcode, letters in
+        // the phone box, rate limit). Read the body so the customer sees that
+        // instead of one generic line for every possible problem.
+        return r.json().catch(function () { return {}; }).then(function (body) {
+          if (!r.ok) {
+            var err = new Error('rejected');
+            err.serverMessage = body && body.error;
+            err.field = body && body.field;
+            throw err;
+          }
+        });
+      })
+      .then(function () {
         form.reset();
         say('ok', 'Thanks, your enquiry has been sent. Sean will get back to you, usually within one working day. For anything urgent, please call instead.');
       })
-      .catch(function () {
-        say('err', 'That did not send. Please call or WhatsApp Sean instead, or email your details directly.');
+      .catch(function (e) {
+        var msg = (e && e.serverMessage)
+          ? e.serverMessage
+          : 'That did not send. Please check your connection and try again, or call or WhatsApp Sean instead.';
+        say('err', msg);
+        // Put the cursor in the field that needs fixing.
+        if (e && e.field) {
+          var el = form.querySelector('[name="' + e.field + '"]');
+          if (el) { el.focus(); el.setAttribute('aria-invalid', 'true'); }
+        }
       })
       .then(function () {
         submit.disabled = false;

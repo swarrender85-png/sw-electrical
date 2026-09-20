@@ -93,10 +93,10 @@
         });
 
         var circle = new google.maps.Circle({
-          strokeColor: '#E5A11C',
+          strokeColor: '#EE9D0D',
           strokeOpacity: 0.9,
           strokeWeight: 2,
-          fillColor: '#E5A11C',
+          fillColor: '#EE9D0D',
           fillOpacity: 0.08,
           map: map,
           center: CENTRE,

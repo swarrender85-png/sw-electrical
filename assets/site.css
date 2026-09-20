@@ -6,12 +6,14 @@
    ========================================================================== */
 
 :root{
-  /* Colour — Direction A: Navy & Brass */
-  --ink:      #0C1B2E;   /* body text, deepest tone */
-  --navy:     #12294A;   /* primary brand surface */
-  --navy-lo:  #1B3B69;   /* hover / secondary navy */
-  --brass:    #E5A11C;   /* accent: rules, marks, icons */
-  --brass-lo: #F0B429;   /* accent on dark backgrounds */
+  /* Colour — matched to the business card / brand pack palette.
+     Derived tones keep the same lightness relationship to the base that
+     the previous navy palette had, so contrast behaviour is unchanged. */
+  --ink:      #011E3E;   /* body text, deepest tone */
+  --navy:     #012F63;   /* primary brand surface */
+  --navy-lo:  #01438E;   /* hover / secondary navy */
+  --brass:    #EE9D0D;   /* accent: rules, marks, icons */
+  --brass-lo: #F3A720;   /* accent on dark backgrounds */
   --paper:    #F7F5F1;   /* page background */
   --white:    #FFFFFF;
   --slate:    #4B5B70;   /* secondary text */
@@ -177,8 +179,8 @@ a:hover{ color:var(--navy-lo); }
 /* ---------- Hero ---------- */
 .hero{
   background:
-    radial-gradient(115% 90% at 12% -10%, #1F4478 0%, rgba(31,68,120,0) 60%),
-    linear-gradient(160deg, #163258 0%, #12294A 45%, #0D1F3B 100%);
+    radial-gradient(115% 90% at 12% -10%, #024DA2 0%, rgba(2,77,162,0) 60%),
+    linear-gradient(160deg, #013876 0%, #012F63 45%, #01254D 100%);
   color:#fff;
   padding:3.25rem 0 2.25rem;
   position:relative;
@@ -283,7 +285,7 @@ a:hover{ color:var(--navy-lo); }
 .section{ padding:3rem 0; }
 .section-alt{ background:var(--white); border-block:1px solid var(--line); }
 .section-dark{
-  background:linear-gradient(165deg, #101F38 0%, #0C1B2E 100%);
+  background:linear-gradient(165deg, #01254D 0%, #011E3E 100%);
   color:#C3D0E0;
 }
 .section-dark h2{ color:#fff; }
@@ -490,7 +492,7 @@ a:hover{ color:var(--navy-lo); }
 
 /* Accreditation panel */
 .credentials{
-  background:linear-gradient(165deg, #163258 0%, #12294A 55%, #0E2140 100%);
+  background:linear-gradient(165deg, #013876 0%, #012F63 55%, #012854 100%);
   border-radius:var(--radius);
   padding:1.6rem 1.4rem;
   margin:2rem 0 2.25rem;

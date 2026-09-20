@@ -244,12 +244,12 @@ async function sendEmail(env, r) {
     .join('');
 
   const html = `
-    <div style="font-family:-apple-system,Segoe UI,sans-serif;color:#0C1B2E;max-width:600px">
+    <div style="font-family:-apple-system,Segoe UI,sans-serif;color:#011E3E;max-width:600px">
       <h2 style="margin:0 0 4px">New website enquiry</h2>
       <p style="margin:0 0 18px;color:#4B5B70">${esc(r.service)} in ${esc(r.postcode)}</p>
       <table style="border-collapse:collapse;font-size:15px">${rows}</table>
       <p style="margin-top:22px">
-        <a href="tel:${esc(r.phone)}" style="background:#12294A;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">Call ${esc(r.name)}</a>
+        <a href="tel:${esc(r.phone)}" style="background:#012F63;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">Call ${esc(r.name)}</a>
       </p>
       <p style="color:#4B5B70;font-size:13px;margin-top:22px">Sent from swelectrical.co.uk. Also saved to the enquiry log.</p>
     </div>`;
@@ -580,13 +580,13 @@ async function sendSurveyEmail(env, r) {
   }
 
   const html = `
-    <div style="font-family:-apple-system,Segoe UI,sans-serif;color:#0C1B2E;max-width:600px">
+    <div style="font-family:-apple-system,Segoe UI,sans-serif;color:#011E3E;max-width:600px">
       <h2 style="margin:0 0 4px">EV charge point survey</h2>
       <p style="margin:0 0 18px;color:#4B5B70">${esc(r.postcode)}</p>
       <table style="border-collapse:collapse;font-size:15px">${rows}</table>
       <div style="margin-top:16px">${mediaHtml}</div>
       <p style="margin-top:22px">
-        <a href="tel:${esc(r.phone)}" style="background:#12294A;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">Call ${esc(r.name)}</a>
+        <a href="tel:${esc(r.phone)}" style="background:#012F63;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">Call ${esc(r.name)}</a>
       </p>
       <p style="color:#4B5B70;font-size:13px;margin-top:22px">Sent from the EV survey on swelectrical.co.uk. Also saved to the survey log.</p>
     </div>`;

@@ -99,7 +99,7 @@ a:hover{ color:var(--navy-lo); }
   display:flex; align-items:center; justify-content:space-between;
   flex-wrap:wrap; gap:1rem; min-height:4.25rem;
 }
-.brand{ display:flex; align-items:center; gap:.7rem; text-decoration:none; }
+.brand{ display:flex; align-items:center; gap:.7rem; text-decoration:none; color:var(--navy); }
 .brand svg{ width:38px; height:38px; flex:none; }
 .brand-text{ display:flex; flex-direction:column; line-height:1; }
 .brand-name{
@@ -280,6 +280,7 @@ a:hover{ color:var(--navy-lo); }
 .crumbs{ font-size:.88rem; color:#9FB3CC; margin-bottom:1rem; }
 .crumbs a{ color:#CBD8E8; }
 .crumbs span{ padding:0 .4rem; }
+.crumbs [aria-current="page"]{ color:#fff; }
 
 /* ---------- Sections ---------- */
 .section{ padding:3rem 0; }
@@ -317,7 +318,11 @@ a:hover{ color:var(--navy-lo); }
   color:var(--navy); background:var(--white);
 }
 .service-icon svg{ width:20px; height:20px; }
-.service h3{ margin-bottom:.4rem; }
+.service h3, .service h2{ margin-bottom:.4rem; }
+/* Where a card or callout is a page's first-level section (e.g. the four
+   cards on the services hub) its title is an h2 for a correct heading
+   outline, but keeps the h3 visual size so nothing changes on screen. */
+.service h2, .notice h2{ font-size:1.15rem; font-weight:650; }
 .service p{ color:var(--slate); font-size:.98rem; margin-bottom:.9rem; }
 .service a.more{ font-weight:650; font-size:.97rem; }
 .service.soon .service-icon{ border-color:#C9C4B8; color:var(--slate); }
@@ -547,7 +552,7 @@ a:hover{ color:var(--navy-lo); }
 .notice-icon svg{ width:18px; height:18px; }
 .notice-icon-alert{ border-color:var(--brass); color:#B87D14; }
 .notice p:last-child{ margin-bottom:0; }
-.notice h3{ margin-bottom:.35rem; }
+.notice h3, .notice h2{ margin-bottom:.35rem; }
 
 .steps{ counter-reset:step; list-style:none; padding:0; }
 .steps li{
@@ -571,6 +576,8 @@ a:hover{ color:var(--navy-lo); }
 .foot-grid ul{ list-style:none; padding:0; margin:0; }
 .foot-grid li{ margin-bottom:.45rem; }
 .foot-brand svg{ width:44px; height:44px; margin-bottom:.75rem; }
+.foot-logo{ color:#fff; display:inline-block; }
+.site-foot .foot-hours{ color:#8FA0B4; margin-top:.8rem; }
 .foot-brand p{ max-width:34ch; }
 .foot-social{ display:flex; gap:.5rem; margin-top:1rem; }
 .foot-social li{ margin:0; }
@@ -586,6 +593,13 @@ a:hover{ color:var(--navy-lo); }
   display:flex; flex-wrap:wrap; gap:.75rem 1.5rem; justify-content:space-between;
   font-size:.86rem; color:#8FA0B4;
 }
+
+/* Radio groups: strip the browser's default fieldset chrome */
+.form fieldset{ border:0; padding:0; margin-inline:0; }
+.form legend{ font-weight:600; margin-bottom:.4rem; padding:0; }
+/* Spam honeypot: off-screen for people, still present for bots */
+.hp{ position:absolute; left:-9999px; }
+.cf-turnstile{ margin:1rem 0; }
 
 /* Survey form sections within the boxed .form card */
 .form h2{ font-size:1.15rem; margin-top:0; }

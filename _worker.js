@@ -113,6 +113,20 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    // One canonical host. Requests to www get a permanent redirect to the same
+    // path and query on the bare domain, so search engines only ever see one
+    // copy of each page and links to the www version pass their value on.
+    // Canonical tags already point at the bare domain, but those are a hint;
+    // a 301 is an instruction.
+    //
+    // 308 rather than 301 for non-GET requests: a 301 lets clients turn a POST
+    // into a GET on redirect, which would silently drop a form submission.
+    if (url.hostname === 'www.swelectrical.co.uk') {
+      url.hostname = 'swelectrical.co.uk';
+      const status = (request.method === 'GET' || request.method === 'HEAD') ? 301 : 308;
+      return Response.redirect(url.toString(), status);
+    }
+
     if (url.pathname === '/api/enquiry') {
       if (request.method !== 'POST') {
         return json({ error: 'POST only' }, 405, { Allow: 'POST' });

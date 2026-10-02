@@ -2,8 +2,7 @@
 
 /* Generic carousels — the EV survey's example-photo slots and the EV
    charging page's charger price carousel both use this. A carousel with
-   no data-count (a single "coming soon" placeholder) has nothing to wire
-   up, since there's only one slide until real content exists. */
+   no data-count holds a single image, so it has no controls to wire up. */
 Array.prototype.forEach.call(document.querySelectorAll('.example-carousel[data-count]'), function (carousel) {
   var slides = Array.prototype.slice.call(carousel.querySelectorAll('.example-slide'));
   var dots = Array.prototype.slice.call(carousel.querySelectorAll('.example-dot'));

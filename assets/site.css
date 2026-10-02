@@ -632,8 +632,17 @@ a:hover{ color:var(--navy-lo); }
    with arrows and dots, once real photos are added to EXAMPLE_PHOTOS in
    build.py. */
 .example-carousel{
-  position:relative; aspect-ratio:4/3; border:1px solid var(--line);
+  position:relative; aspect-ratio:4/5; border:1px solid var(--line);
   border-radius:var(--radius); background:#EFECE5; overflow:hidden;
+}
+/* Portrait (4:5) because the things being photographed are tall: a meter
+   cupboard needs the meter at the top and the main fuse at the bottom in one
+   shot. Example images are exported at exactly this shape. The charger
+   carousel overrides the shape with its own fixed height. */
+.example-badge{
+  position:absolute; top:.65rem; left:.65rem; z-index:1;
+  font-size:.74rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  background:rgba(1,30,62,.84); color:#fff; padding:.28rem .62rem; border-radius:100px;
 }
 .example-track{ position:relative; width:100%; height:100%; }
 .example-slide{

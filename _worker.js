@@ -187,7 +187,7 @@ function checkContact(c) {
     return { error: 'That email address does not look right. Please check it and try again.', field: 'email' };
   }
   if (!PHONE_OK.test(c.phone)) {
-    return { error: 'That phone number does not look right. Please use digits only, for example 07968 991258.', field: 'phone' };
+    return { error: 'That phone number does not look right. Please use digits only, for example 07700 900123.', field: 'phone' };
   }
   if (!UK_POSTCODE_OK.test(c.postcode)) {
     return { error: 'That postcode does not look right. Please check it, for example SY3 9NT.', field: 'postcode' };

@@ -476,6 +476,10 @@ a:hover{ color:var(--navy-lo); }
   padding:.8rem .85rem; border:1px solid #C9C4B8; border-radius:var(--radius);
   background:var(--white); min-height:48px;
 }
+/* Example text inside empty fields. Browser defaults are too pale to read
+   (Chrome's is about 2.3:1); this is 5.0:1 on white, yet still clearly
+   lighter than typed text, so it never reads as a filled-in value. */
+.field input::placeholder, .field textarea::placeholder{ color:#66707E; opacity:1; }
 .field textarea{ min-height:130px; resize:vertical; }
 .radio-row{ display:flex; flex-wrap:wrap; gap:1rem; }
 .radio-row label{ display:flex; align-items:center; gap:.45rem; font-weight:400; }

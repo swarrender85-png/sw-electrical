@@ -106,7 +106,7 @@ function swValidate(form, required) {
     return { field: 'email', error: 'That email address does not look right. Please check it and try again.' };
   }
   if (!SW_PHONE_OK.test(val('phone'))) {
-    return { field: 'phone', error: 'That phone number does not look right. Please use digits only, for example 07968 991258.' };
+    return { field: 'phone', error: 'That phone number does not look right. Please use digits only, for example 07700 900123.' };
   }
   if (!SW_POSTCODE_OK.test(val('postcode'))) {
     return { field: 'postcode', error: 'That postcode does not look right. Please check it, for example SY3 9NT.' };

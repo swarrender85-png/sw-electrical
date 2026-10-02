@@ -168,7 +168,7 @@ const FIELDS = {
   phone:    { max: 40,   label: 'a phone number' },
   email:    { max: 200,  label: 'an email address' },
   postcode: { max: 12,   label: 'a postcode' },
-  service:  { max: 80,   label: 'the service you need' },
+  service:  { max: 80,   label: 'the service you need', missing: 'Please choose the service you need.' },
   details:  { max: 4000, label: 'a short description of the work' }
 };
 
@@ -178,6 +178,22 @@ const FIELDS = {
 // customer fumbling their own postcode should still be able to reach Sean.
 const PHONE_OK = /^[0-9+()\s.-]{7,}$/;
 const UK_POSTCODE_OK = /^[A-Z]{1,2}[0-9][A-Z0-9]?\s*[0-9][A-Z]{2}$/i;
+const EMAIL_OK = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+/** Shared by the enquiry and EV survey forms. Returns null if the contact
+ *  details look valid, otherwise { error, field } ready to send as JSON. */
+function checkContact(c) {
+  if (!EMAIL_OK.test(c.email)) {
+    return { error: 'That email address does not look right. Please check it and try again.', field: 'email' };
+  }
+  if (!PHONE_OK.test(c.phone)) {
+    return { error: 'That phone number does not look right. Please use digits only, for example 07968 991258.', field: 'phone' };
+  }
+  if (!UK_POSTCODE_OK.test(c.postcode)) {
+    return { error: 'That postcode does not look right. Please check it, for example SY3 9NT.', field: 'postcode' };
+  }
+  return null;
+}
 
 async function handleEnquiry(request, env, ctx) {
   const limited = await checkRateLimit(request, env, 'enquiry');
@@ -187,7 +203,7 @@ async function handleEnquiry(request, env, ctx) {
   try {
     d = await request.json();
   } catch {
-    return json({ error: 'Bad request' }, 400);
+    return json({ error: 'Your enquiry did not arrive complete. Please try sending it again.' }, 400);
   }
 
   // Honeypot: bots fill every field, people leave this one alone.
@@ -195,29 +211,27 @@ async function handleEnquiry(request, env, ctx) {
 
   if (failsTimeTrap(d.form_started)) return json({ ok: true }, 200);
 
-  if (!(await verifyTurnstile(d['cf-turnstile-response'], env, request))) {
-    return json({ error: 'The anti-spam check did not pass. Please reload the page and try again.' }, 400);
-  }
-
   // Validation messages are written to be read by the customer and to name the
   // field, so a failed submission says what to fix instead of just failing.
+  //
+  // Field checks run BEFORE Turnstile on purpose. Turnstile tokens are single
+  // use: checking it first spent the token on a submission that then failed
+  // validation, so the customer's corrected retry was rejected as a failed
+  // anti-spam check however right the form now was.
   const clean = {};
-  for (const [field, { max, label }] of Object.entries(FIELDS)) {
+  for (const [field, { max, label, missing }] of Object.entries(FIELDS)) {
     const v = String(d[field] ?? '').trim();
-    if (!v) return json({ error: `Please enter ${label}.`, field }, 400);
+    if (!v) return json({ error: missing || `Please enter ${label}.`, field }, 400);
     if (v.length > max) {
       return json({ error: `That ${label.replace(/^(your|an|a|the) /, '')} is too long. Please shorten it and try again.`, field }, 400);
     }
     clean[field] = v;
   }
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean.email)) {
-    return json({ error: 'That email address does not look right. Please check it and try again.', field: 'email' }, 400);
-  }
-  if (!PHONE_OK.test(clean.phone)) {
-    return json({ error: 'That phone number does not look right. Please use digits only, for example 07968 991258.', field: 'phone' }, 400);
-  }
-  if (!UK_POSTCODE_OK.test(clean.postcode)) {
-    return json({ error: 'That postcode does not look right. Please check it, for example SY3 9NT.', field: 'postcode' }, 400);
+  const bad = checkContact(clean);
+  if (bad) return json(bad, 400);
+
+  if (!(await verifyTurnstile(d['cf-turnstile-response'], env, request))) {
+    return json({ error: 'The anti-spam check did not pass. Please tick the box again and resend.', turnstile: true }, 400);
   }
 
   const preferred = ['Phone', 'WhatsApp', 'Email'].includes(d.preferred) ? d.preferred : null;
@@ -332,10 +346,19 @@ const SURVEY_MAX_PHOTO_BYTES = 8 * 1024 * 1024;   // matches the client-side com
 const SURVEY_MAX_PHOTOS_PER_SLOT = 6;
 const SURVEY_MAX_VIDEO_BYTES = 60 * 1024 * 1024;  // raw — video isn't compressed client-side
 const SURVEY_LINK_LIFETIME_SECONDS = 7 * 24 * 60 * 60; // 7 days
+// field -> { max length, required?, message when missing, short name for "too long" }
 const SURVEY_TEXT_FIELDS = {
-  name: 100, phone: 40, email: 200, postcode: 12,
-  property_type: 60, tenure: 20, parking_type: 60,
-  charger_location_notes: 1000, ev_status: 40, preferred_time: 100, notes: 2000
+  name:          { max: 100,  missing: 'Please enter your name.',                 short: 'name' },
+  phone:         { max: 40,   missing: 'Please enter a phone number.',            short: 'phone number' },
+  email:         { max: 200,  missing: 'Please enter an email address.',          short: 'email address' },
+  postcode:      { max: 12,   missing: 'Please enter a postcode.',                short: 'postcode' },
+  property_type: { max: 60,   missing: 'Please choose your property type.',       short: 'property type' },
+  tenure:        { max: 20,                                                      short: 'answer' },
+  parking_type:  { max: 60,   missing: 'Please choose where you park.',           short: 'parking answer' },
+  charger_location_notes: { max: 1000,                                           short: 'charger location note' },
+  ev_status:     { max: 40,                                                      short: 'answer' },
+  preferred_time:{ max: 100,                                                     short: 'preferred time' },
+  notes:         { max: 2000,                                                    short: 'note' }
 };
 
 async function handleEvSurvey(request, env, ctx) {
@@ -346,7 +369,7 @@ async function handleEvSurvey(request, env, ctx) {
   try {
     form = await request.formData();
   } catch {
-    return json({ error: 'Bad request' }, 400);
+    return json({ error: 'Your survey did not arrive complete, which usually means the connection dropped during the upload. Please try again on a stronger signal, or with fewer photos.' }, 400);
   }
 
   // Honeypot
@@ -354,90 +377,96 @@ async function handleEvSurvey(request, env, ctx) {
 
   if (failsTimeTrap(form.get('form_started'))) return json({ ok: true }, 200);
 
-  if (!(await verifyTurnstile(form.get('cf-turnstile-response'), env, request))) {
-    return json({ error: 'The anti-spam check did not pass. Please reload the page and try again.' }, 400);
-  }
-
+  // Everything is validated before anything else happens, in this order:
+  //   1. text fields   2. photos and video   3. Turnstile   4. uploads
+  // Turnstile comes after validation because its tokens are single use (see
+  // handleEnquiry). Files are all checked before any upload starts, so a bad
+  // third photo can no longer leave the first two orphaned in storage.
   const clean = {};
-  for (const [field, max] of Object.entries(SURVEY_TEXT_FIELDS)) {
+  for (const [field, rule] of Object.entries(SURVEY_TEXT_FIELDS)) {
     const v = String(form.get(field) ?? '').trim();
-    const required = ['name', 'phone', 'email', 'postcode', 'property_type', 'parking_type'].includes(field);
-    if (required && !v) return json({ error: `Missing ${field}` }, 400);
-    if (v.length > max) return json({ error: `${field} too long` }, 400);
+    if (rule.missing && !v) return json({ error: rule.missing, field }, 400);
+    if (v.length > rule.max) {
+      return json({ error: `That ${rule.short} is too long. Please shorten it and try again.`, field }, 400);
+    }
     clean[field] = v;
   }
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean.email)) {
-    return json({ error: 'Invalid email' }, 400);
+  const bad = checkContact(clean);
+  if (bad) return json(bad, 400);
+
+  const filesBySlot = {};
+  for (const slot of SURVEY_PHOTO_SLOTS) {
+    const files = form.getAll('photo_' + slot)
+      .filter((f) => typeof f !== 'string' && f.size > 0)
+      .slice(0, SURVEY_MAX_PHOTOS_PER_SLOT);
+    for (const file of files) {
+      if (!file.type || !file.type.startsWith('image/')) {
+        return json({ error: `One of the ${slotLabel(slot).toLowerCase()} photos is not an image file. Please remove it and add a photo instead.`, field: 'photo_' + slot }, 400);
+      }
+      if (file.size > SURVEY_MAX_PHOTO_BYTES) {
+        return json({ error: `One of the ${slotLabel(slot).toLowerCase()} photos is too large. Please remove it and try a different photo.`, field: 'photo_' + slot }, 400);
+      }
+    }
+    filesBySlot[slot] = files;
   }
 
-  if (!env.DB) return json({ error: 'Something went wrong at our end. Please call or WhatsApp Sean instead.' }, 500);
-  if (!env.SURVEY_PHOTOS) return json({ error: 'Photo storage not configured' }, 500);
+  let videoFile = form.get('video_cable_route');
+  if (!(videoFile && typeof videoFile !== 'string' && videoFile.size > 0)) videoFile = null;
+  if (videoFile) {
+    if (!videoFile.type || !videoFile.type.startsWith('video/')) {
+      return json({ error: 'The cable route video is not a video file. Please remove it and add a video instead.', field: 'video_cable_route' }, 400);
+    }
+    if (videoFile.size > SURVEY_MAX_VIDEO_BYTES) {
+      return json({ error: 'The cable route video is too large. Please record a shorter clip, around 20 seconds is plenty.', field: 'video_cable_route' }, 400);
+    }
+  }
+
+  if (!(await verifyTurnstile(form.get('cf-turnstile-response'), env, request))) {
+    return json({ error: 'The anti-spam check did not pass. Please tick the box again and resend.', turnstile: true }, 400);
+  }
+
+  if (!env.DB || !env.SURVEY_PHOTOS) {
+    return json({ error: 'Something went wrong at our end. Please call or WhatsApp Sean instead.' }, 500);
+  }
 
   const id = crypto.randomUUID();
   const photoKeysBySlot = {};   // slot -> array of R2 keys
   const mediaForEmail = [];     // { label, key, kind } — used to build view links
-  const photoUploads = [];      // in-flight R2 writes, kicked off immediately below
+  const photoUploads = [];      // in-flight R2 writes
 
+  // Files go to R2 as the File objects themselves rather than via
+  // arrayBuffer(). The request body is already buffered by formData(), so
+  // arrayBuffer() made a second full copy: with a near-limit phone video
+  // that is well over 100MB against a 128MB Worker memory ceiling.
   for (const slot of SURVEY_PHOTO_SLOTS) {
-    const files = form.getAll('photo_' + slot).filter((f) => typeof f !== 'string' && f.size > 0);
     const keys = [];
-
-    for (const file of files.slice(0, SURVEY_MAX_PHOTOS_PER_SLOT)) {
-      if (!file.type || !file.type.startsWith('image/')) {
-        return json({ error: `${slot} contains a non-image file` }, 400);
-      }
-      if (file.size > SURVEY_MAX_PHOTO_BYTES) {
-        return json({ error: `A photo in ${slot} is too large` }, 400);
-      }
-
+    for (const file of filesBySlot[slot]) {
       const key = `ev-surveys/${id}/${slot}-${keys.length}.jpg`;
       keys.push(key);
       mediaForEmail.push({ label: slotLabel(slot) + ` (photo ${keys.length})`, key, kind: 'photo' });
-
-      // Kicked off now, not awaited here — every photo (and the video,
-      // below) uploads to R2 concurrently rather than one at a time.
-      // Previously a survey with several photos plus a video could take
-      // several times longer than the actual network transfer needed,
-      // since each file waited for the one before it to finish writing.
-      photoUploads.push(
-        file.arrayBuffer().then((buffer) =>
-          env.SURVEY_PHOTOS.put(key, buffer, { httpMetadata: { contentType: file.type } })
-        )
-      );
+      photoUploads.push(env.SURVEY_PHOTOS.put(key, file, { httpMetadata: { contentType: file.type } }));
     }
-
     if (keys.length) photoKeysBySlot[slot] = keys;
   }
 
-  // Cable route's optional video — validated the same way, upload kicked
-  // off alongside the photos above so it runs concurrently with them.
   let videoKey = null;
   let videoUpload = null;
-  const videoFile = form.get('video_cable_route');
-  if (videoFile && typeof videoFile !== 'string' && videoFile.size > 0) {
-    if (!videoFile.type || !videoFile.type.startsWith('video/')) {
-      return json({ error: 'Cable route video is not a video file' }, 400);
-    }
-    if (videoFile.size > SURVEY_MAX_VIDEO_BYTES) {
-      return json({ error: 'Cable route video is too large' }, 400);
-    }
+  if (videoFile) {
     videoKey = `ev-surveys/${id}/cable_route-video.mp4`;
     mediaForEmail.push({ label: 'Cable route (video)', key: videoKey, kind: 'video' });
-    videoUpload = videoFile.arrayBuffer().then((buffer) =>
-      env.SURVEY_PHOTOS.put(videoKey, buffer, { httpMetadata: { contentType: videoFile.type } })
-    );
+    videoUpload = env.SURVEY_PHOTOS.put(videoKey, videoFile, { httpMetadata: { contentType: videoFile.type } });
   }
 
   try {
     await Promise.all(photoUploads);
   } catch {
-    return json({ error: 'Could not store a photo' }, 500);
+    return json({ error: 'Your photos could not be saved at our end. Please try again, or send them to Sean on WhatsApp.' }, 500);
   }
   if (videoUpload) {
     try {
       await videoUpload;
     } catch {
-      return json({ error: 'Could not store the video' }, 500);
+      return json({ error: 'Your video could not be saved at our end. Please try again without it, or send it to Sean on WhatsApp.' }, 500);
     }
   }
 

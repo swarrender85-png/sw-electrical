@@ -487,6 +487,12 @@ a:hover{ color:var(--navy-lo); }
 .form-status.show{ display:block; }
 .form-status.ok{ background:#E7F3EC; border:1px solid #B7DCC6; color:#14532D; }
 .form-status.err{ background:#FBEAEA; border:1px solid #E5B4B4; color:#7A1F1F; }
+/* Field-level errors: the message sits directly under the field at fault,
+   and the field itself is outlined, so the customer sees what to fix
+   without hunting for it. */
+.field-error{ color:#7A1F1F; font-size:.92rem; font-weight:500; margin:.45rem 0 0; }
+.field [aria-invalid="true"]{ border-color:#B42318; box-shadow:0 0 0 3px rgba(180,35,24,.14); }
+.photo-slot.has-error, .video-slot.has-error{ outline:2px solid #B42318; outline-offset:6px; border-radius:var(--radius); }
 
 /* Contact detail rows */
 .contact-list{ list-style:none; padding:0; margin:0 0 2rem; }

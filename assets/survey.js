@@ -156,8 +156,27 @@
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
+    swClearFieldErrors(form);
 
     if (form.querySelector('[name="company"]').value) return; // honeypot
+
+    // Check the details BEFORE uploading anything. A survey can carry a
+    // dozen photos and a video; finding a typo in the phone number only
+    // after all of that has uploaded is a miserable experience on mobile.
+    // The worker re-checks everything and has the final say.
+    var problem = swValidate(form, [
+      ['name', 'Please enter your name.'],
+      ['phone', 'Please enter a phone number.'],
+      ['email', 'Please enter an email address.'],
+      ['postcode', 'Please enter a postcode.'],
+      ['property_type', 'Please choose your property type.'],
+      ['parking_type', 'Please choose where you park.']
+    ]);
+    if (problem) {
+      say('err', problem.error);
+      swShowFieldError(form, problem.field, problem.error);
+      return;
+    }
 
     var data = new FormData(form);
     var fd = new FormData();
@@ -177,11 +196,21 @@
 
     submit.disabled = true;
     var original = submit.textContent;
-    submit.textContent = 'Sending…';
+    submit.textContent = 'Sending… please keep this page open';
 
     fetch('/api/ev-survey', { method: 'POST', body: fd })
       .then(function (r) {
-        if (!r.ok) throw new Error('Request failed');
+        return r.json().catch(function () { return {}; }).then(function (body) {
+          if (!r.ok) {
+            var err = new Error('rejected');
+            err.status = r.status;
+            err.serverMessage = body && body.error;
+            err.field = body && body.field;
+            throw err;
+          }
+        });
+      })
+      .then(function () {
         form.reset();
         Object.keys(photos).forEach(function (slot) {
           (photos[slot] || []).forEach(function (entry) { URL.revokeObjectURL(entry.url); });
@@ -198,10 +227,26 @@
         });
         say('ok', "Thanks — that's all sent through. I'll go through it and come back to you, usually within one working day.");
       })
-      .catch(function () {
-        say('err', "That didn't send. Please call or WhatsApp instead, a photo of your fuse board and meter is a great start.");
+      .catch(function (e) {
+        var msg;
+        if (e && e.serverMessage) {
+          msg = e.serverMessage;
+        } else if (e && e.status === 413) {
+          // Rejected by Cloudflare before reaching the worker, so no JSON.
+          msg = 'Those photos and video add up to more than can be sent in one go. Please remove the video or a few photos and try again, and send the rest to Sean on WhatsApp.';
+        } else if (e && e.status) {
+          msg = "That didn't send because of a problem at our end. Please try again in a moment, or call or WhatsApp Sean instead.";
+        } else {
+          // fetch itself failed: no response at all, almost always the
+          // connection dropping part way through a large upload.
+          msg = "The upload didn't finish, which usually means the signal dropped part way through. Please try again on Wi-Fi or a stronger signal, or with fewer photos.";
+        }
+        say('err', msg);
+        if (e && e.field) swShowFieldError(form, e.field, msg);
       })
       .then(function () {
+        // Whatever happened, the Turnstile token is now spent.
+        swResetTurnstile(form);
         submit.disabled = false;
         submit.textContent = original;
       });

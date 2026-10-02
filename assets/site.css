@@ -554,6 +554,25 @@ a:hover{ color:var(--navy-lo); }
 }
 .credential span{ color:#A9BBD0; font-size:.9rem; line-height:1.5; display:block; }
 
+/* EV page government grants: two cards, same white-panel look as the About
+   page's "At a glance" card, topped with the brass rule used on section
+   headings. Side by side from 720px, stacked below. */
+.grants{ display:grid; gap:1rem; margin:1.4rem 0 1.25rem; }
+@media (min-width:720px){ .grants{ grid-template-columns:1fr 1fr; gap:1.25rem; } }
+.grant{
+  background:var(--white); border:1px solid var(--line); border-top:3px solid var(--brass);
+  border-radius:var(--radius); padding:1.3rem 1.5rem 1.45rem;
+}
+.grant-amount{
+  font-family:var(--font-display); font-weight:700; color:var(--navy);
+  font-size:1.75rem; line-height:1.1; margin:0;
+}
+.grant-amount span{ font-family:var(--font-body); font-size:.85rem; font-weight:600; color:var(--slate); margin-right:.15rem; }
+.grant h3{ font-size:1.1rem; margin:.55rem 0 .35rem; }
+.grant p{ margin:0 0 .6rem; }
+.grant ul{ margin:0; padding-left:1.15rem; }
+.grant li{ margin:.3rem 0; font-size:.96rem; color:var(--slate); }
+
 .notice{
   display:flex; gap:1rem; align-items:flex-start;
   border-top:1px solid var(--line); border-bottom:1px solid var(--line);

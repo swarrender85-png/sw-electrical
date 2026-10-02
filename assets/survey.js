@@ -17,6 +17,7 @@
   if (startedField) startedField.value = String(Date.now() / 1000);
 
   if (typeof loadTurnstileIfConfigured === 'function') loadTurnstileIfConfigured(form);
+  if (typeof swLiveChecks === 'function') swLiveChecks(form);
 
   var MAX_DIMENSION = 1600;
   var JPEG_QUALITY = 0.82;

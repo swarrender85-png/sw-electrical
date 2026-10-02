@@ -495,6 +495,12 @@ a:hover{ color:var(--navy-lo); }
    and the field itself is outlined, so the customer sees what to fix
    without hunting for it. */
 .field-error{ color:#7A1F1F; font-size:.92rem; font-weight:500; margin:.45rem 0 0; }
+/* "Did you mean …?" under the email field. Informational, not an error. */
+.field-suggest{ color:var(--ink); font-size:.92rem; margin:.45rem 0 0; }
+.field-suggest-btn{
+  font:inherit; font-weight:600; color:var(--navy); background:none; border:0;
+  padding:.35rem .1rem; margin-left:.15rem; text-decoration:underline; cursor:pointer; min-height:44px;
+}
 .field [aria-invalid="true"]{ border-color:#B42318; box-shadow:0 0 0 3px rgba(180,35,24,.14); }
 .photo-slot.has-error, .video-slot.has-error{ outline:2px solid #B42318; outline-offset:6px; border-radius:var(--radius); }
 

@@ -176,7 +176,27 @@ const FIELDS = {
 // the phone box, a postcode that is clearly not one) without rejecting valid
 // entries: people write numbers with spaces, brackets, +44 prefixes, and a
 // customer fumbling their own postcode should still be able to reach Sean.
-const PHONE_OK = /^[0-9+()\s.-]{7,}$/;
+// UK-aware phone check, judged on digits. Spaces, brackets, dots and dashes
+// are ignored; +44 / 0044 are converted to the 0 form; then the length must
+// fit the number type. Mobiles (07) are always 11 digits, so a mobile with a
+// digit missing - the commonest typo, and one that leaves Sean unable to call
+// back - is caught, while genuine 10-digit 01 landlines still pass.
+// IDENTICAL copies live in _worker.js (phoneOk) and assets/site.js (swPhoneOk).
+function phoneOk(v) {
+  var s = String(v).replace(/[\s().-]/g, '');
+  if (!/^\+?\d+$/.test(s)) return false;
+  var n;
+  if (s.indexOf('+44') === 0) n = s.slice(3);
+  else if (s.indexOf('0044') === 0) n = s.slice(4);
+  else if (s.charAt(0) === '+' || s.indexOf('00') === 0) {
+    var intl = s.replace(/^\+|^00/, '');          // another country: E.164 allows 8-15 digits
+    return intl.length >= 8 && intl.length <= 15;
+  } else n = s;
+  if (n.charAt(0) !== '0') n = '0' + n;           // +44 7968... and 7968... both become 07968...
+  if (/^0[2379]/.test(n)) return n.length === 11; // mobiles (07) and 02, 03, 09 are always 11
+  if (/^0[18]/.test(n)) return n.length === 10 || n.length === 11; // some 01 and 08 are 10
+  return false;
+}
 const UK_POSTCODE_OK = /^[A-Z]{1,2}[0-9][A-Z0-9]?\s*[0-9][A-Z]{2}$/i;
 const EMAIL_OK = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -186,8 +206,8 @@ function checkContact(c) {
   if (!EMAIL_OK.test(c.email)) {
     return { error: 'That email address does not look right. Please check it and try again.', field: 'email' };
   }
-  if (!PHONE_OK.test(c.phone)) {
-    return { error: 'That phone number does not look right. Please use digits only, for example 07700 900123.', field: 'phone' };
+  if (!phoneOk(c.phone)) {
+    return { error: 'That phone number does not look right. Please enter the full number, for example 07700 900123.', field: 'phone' };
   }
   if (!UK_POSTCODE_OK.test(c.postcode)) {
     return { error: 'That postcode does not look right. Please check it, for example SY3 9NT.', field: 'postcode' };

@@ -351,6 +351,9 @@ const SURVEY_TEXT_FIELDS = {
   name:          { max: 100,  missing: 'Please enter your name.',                 short: 'name' },
   phone:         { max: 40,   missing: 'Please enter a phone number.',            short: 'phone number' },
   email:         { max: 200,  missing: 'Please enter an email address.',          short: 'email address' },
+  address_line1: { max: 120,  missing: 'Please enter the first line of your address.', short: 'address line' },
+  address_line2: { max: 120,                                                     short: 'address line' },
+  town:          { max: 60,   missing: 'Please enter your town or city.',          short: 'town or city' },
   postcode:      { max: 12,   missing: 'Please enter a postcode.',                short: 'postcode' },
   property_type: { max: 60,   missing: 'Please choose your property type.',       short: 'property type' },
   tenure:        { max: 20,                                                      short: 'answer' },
@@ -470,29 +473,56 @@ async function handleEvSurvey(request, env, ctx) {
     }
   }
 
+  // The address columns are newer than the table. If the code goes live
+  // before `ALTER TABLE ev_surveys ADD COLUMN ...` has been run, the full
+  // insert fails with "no such column". Rather than lose the survey, save it
+  // without those columns and put the address at the top of the notes, so it
+  // is never dropped whichever order the deploy and the migration happen in.
+  const media = [
+    jsonOrNull(photoKeysBySlot.consumer_unit),
+    jsonOrNull(photoKeysBySlot.supply_meter),
+    jsonOrNull(photoKeysBySlot.cable_route),
+    jsonOrNull(photoKeysBySlot.charger_location),
+    videoKey
+  ];
+  const base = [
+    id, clean.name, clean.phone, clean.email, clean.postcode,
+    clean.property_type, clean.tenure || null, clean.parking_type,
+    clean.charger_location_notes || null, clean.ev_status || null,
+    clean.preferred_time || null
+  ];
   try {
-    await env.DB.prepare(
-      `INSERT INTO ev_surveys
-         (id, name, phone, email, postcode, property_type, tenure, parking_type,
-          charger_location_notes, ev_status, preferred_time, notes,
-          photo_consumer_unit, photo_supply_meter, photo_cable_route, photo_charger_location,
-          video_cable_route)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    )
-      .bind(
-        id, clean.name, clean.phone, clean.email, clean.postcode,
-        clean.property_type, clean.tenure || null, clean.parking_type,
-        clean.charger_location_notes || null, clean.ev_status || null,
-        clean.preferred_time || null, clean.notes || null,
-        jsonOrNull(photoKeysBySlot.consumer_unit),
-        jsonOrNull(photoKeysBySlot.supply_meter),
-        jsonOrNull(photoKeysBySlot.cable_route),
-        jsonOrNull(photoKeysBySlot.charger_location),
-        videoKey
+    try {
+      await env.DB.prepare(
+        `INSERT INTO ev_surveys
+           (id, name, phone, email, postcode, property_type, tenure, parking_type,
+            charger_location_notes, ev_status, preferred_time, notes,
+            photo_consumer_unit, photo_supply_meter, photo_cable_route, photo_charger_location,
+            video_cable_route, address_line1, address_line2, town)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
-      .run();
+        .bind(...base, clean.notes || null, ...media,
+              clean.address_line1, clean.address_line2 || null, clean.town)
+        .run();
+    } catch (e) {
+      // SQLite words this differently by statement: an INSERT naming a missing
+      // column says "has no column named", a SELECT says "no such column".
+      if (!/has no column named|no such column/i.test(String(e && e.message))) throw e;
+      const addr = [clean.address_line1, clean.address_line2, clean.town].filter(Boolean).join(', ');
+      const notes = `Address: ${addr}` + (clean.notes ? `\n\n${clean.notes}` : '');
+      await env.DB.prepare(
+        `INSERT INTO ev_surveys
+           (id, name, phone, email, postcode, property_type, tenure, parking_type,
+            charger_location_notes, ev_status, preferred_time, notes,
+            photo_consumer_unit, photo_supply_meter, photo_cable_route, photo_charger_location,
+            video_cable_route)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      )
+        .bind(...base, notes, ...media)
+        .run();
+    }
   } catch {
-    return json({ error: 'Could not save survey' }, 500);
+    return json({ error: 'Your survey could not be saved at our end. Please try again, or call or WhatsApp Sean instead.' }, 500);
   }
 
   ctx.waitUntil(sendSurveyEmail(env, { id, ...clean, media: mediaForEmail }));
@@ -611,8 +641,15 @@ async function sendSurveyEmail(env, r) {
   const esc = (s) =>
     String(s ?? '').replace(/[<>&]/g, (ch) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[ch]));
 
+  // Full address on separate lines, postcode last, as it would be written
+  // on an envelope. Falls back to the postcode alone for older submissions.
+  const addressLines = [r.address_line1, r.address_line2, r.town, r.postcode].filter(Boolean);
+  const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' +
+    encodeURIComponent(addressLines.join(', '));
+
   const rows = [
-    ['Name', r.name], ['Phone', r.phone], ['Email', r.email], ['Postcode', r.postcode],
+    ['Name', r.name], ['Phone', r.phone], ['Email', r.email],
+    ['Address', addressLines.join('\n')],
     ['Property type', r.property_type], ['Tenure', r.tenure],
     ['Parking', r.parking_type], ['Preferred charger location', r.charger_location_notes],
     ['EV status', r.ev_status], ['Best time to call', r.preferred_time], ['Notes', r.notes]
@@ -643,11 +680,12 @@ async function sendSurveyEmail(env, r) {
   const html = `
     <div style="font-family:-apple-system,Segoe UI,sans-serif;color:#011E3E;max-width:600px">
       <h2 style="margin:0 0 4px">EV charge point survey</h2>
-      <p style="margin:0 0 18px;color:#4B5B70">${esc(r.postcode)}</p>
+      <p style="margin:0 0 18px;color:#4B5B70">${esc([r.town, r.postcode].filter(Boolean).join(', '))}</p>
       <table style="border-collapse:collapse;font-size:15px">${rows}</table>
       <div style="margin-top:16px">${mediaHtml}</div>
       <p style="margin-top:22px">
         <a href="tel:${esc(r.phone)}" style="background:#012F63;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">Call ${esc(r.name)}</a>
+        <a href="${mapsUrl}" style="margin-left:8px;border:1px solid #012F63;color:#012F63;padding:9px 15px;border-radius:6px;text-decoration:none">Open in Google Maps</a>
       </p>
       <p style="color:#4B5B70;font-size:13px;margin-top:22px">Sent from the EV survey on swelectrical.co.uk. Also saved to the survey log.</p>
     </div>`;

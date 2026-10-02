@@ -95,3 +95,22 @@ Sean may want extra fields captured. Two-step change, both in `build.py`:
    `ALTER TABLE ev_surveys ADD COLUMN ...` in D1
 
 Small, contained change — nothing structural needs to move.
+
+## Change log
+
+### Full address (October 2026)
+
+Sean asked for the customer's full address on the survey. Three columns were
+added to `ev_surveys`. Run once in the Cloudflare dashboard, under
+D1, `sw-electrical`, Console:
+
+```sql
+ALTER TABLE ev_surveys ADD COLUMN address_line1 TEXT;
+ALTER TABLE ev_surveys ADD COLUMN address_line2 TEXT;
+ALTER TABLE ev_surveys ADD COLUMN town TEXT;
+```
+
+The worker is safe whichever order this and the deploy happen in. If the
+columns are missing, the survey is saved without them and the address is
+written to the top of `notes` instead, so nothing is lost. Surveys saved
+that way can be told apart by their notes starting `Address:`.

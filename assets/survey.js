@@ -168,6 +168,8 @@
       ['name', 'Please enter your name.'],
       ['phone', 'Please enter a phone number.'],
       ['email', 'Please enter an email address.'],
+      ['address_line1', 'Please enter the first line of your address.'],
+      ['town', 'Please enter your town or city.'],
       ['postcode', 'Please enter a postcode.'],
       ['property_type', 'Please choose your property type.'],
       ['parking_type', 'Please choose where you park.']
@@ -180,7 +182,7 @@
 
     var data = new FormData(form);
     var fd = new FormData();
-    ['name', 'phone', 'email', 'postcode', 'property_type', 'tenure',
+    ['name', 'phone', 'email', 'address_line1', 'address_line2', 'town', 'postcode', 'property_type', 'tenure',
      'parking_type', 'charger_location_notes', 'ev_status', 'preferred_time', 'notes',
      'form_started', 'cf-turnstile-response']
       .forEach(function (key) { fd.append(key, data.get(key) || ''); });

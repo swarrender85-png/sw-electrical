@@ -622,10 +622,9 @@ a:hover{ color:var(--navy-lo); }
 @media (min-width:640px){ .photo-slots{ grid-template-columns:1fr 1fr; } }
 .photo-slot{ display:flex; flex-direction:column; gap:.85rem; }
 /* Example carousel — shows what a good photo of this thing looks like.
-   Same box size as the old static placeholder. With zero example images
-   configured it shows one honest "coming soon" slide and no controls;
-   arrows and dots appear automatically once real photos are added to
-   EXAMPLE_PHOTOS in build.py. */
+   A slot with no example images renders no carousel at all; it appears,
+   with arrows and dots, once real photos are added to EXAMPLE_PHOTOS in
+   build.py. */
 .example-carousel{
   position:relative; aspect-ratio:4/3; border:1px solid var(--line);
   border-radius:var(--radius); background:#EFECE5; overflow:hidden;

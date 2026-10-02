@@ -124,7 +124,7 @@
       if (!file) return;
       if (file.type.indexOf('video/') !== 0) { input.value = ''; return; }
       if (file.size > MAX_VIDEO_BYTES) {
-        filenameEl.textContent = "That video's a bit large — a shorter clip works better.";
+        filenameEl.textContent = "That video is too long to send. Please record a shorter clip, around 20 seconds is plenty.";
         fileRow.hidden = false;
         input.value = '';
         return;

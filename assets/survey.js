@@ -254,4 +254,46 @@
         submit.textContent = original;
       });
   });
+
+  /* ---------- Enlarge example photos ----------
+     Each example is a link to its large version, so it opens even without
+     JavaScript. Here it's upgraded to an in-page viewer using the native
+     <dialog>, which handles Escape and keeps keyboard focus inside while open.
+     Closes with the button, Escape, or a tap on the dark backdrop, and puts
+     focus back on the photo that opened it. */
+  var zoomLinks = document.querySelectorAll('[data-zoom]');
+  if (zoomLinks.length && typeof HTMLDialogElement === 'function') {
+    var dlg = document.createElement('dialog');
+    dlg.className = 'zoom-dialog';
+    dlg.setAttribute('aria-label', 'Enlarged example photo');
+    dlg.innerHTML = '<button type="button" class="zoom-close" aria-label="Close">&times;</button>' +
+                    '<img alt=""><p class="zoom-caption" aria-hidden="true"></p>';
+    document.body.appendChild(dlg);
+    var zImg = dlg.querySelector('img');
+    var zCap = dlg.querySelector('.zoom-caption');
+    var opener = null;
+
+    dlg.querySelector('.zoom-close').addEventListener('click', function () { dlg.close(); });
+    // A click whose target is the dialog itself landed on the backdrop.
+    dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener('close', function () {
+      document.documentElement.classList.remove('zoom-open');
+      zImg.removeAttribute('src');
+      if (opener) opener.focus();
+    });
+
+    Array.prototype.forEach.call(zoomLinks, function (link) {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        opener = link;
+        var thumb = link.querySelector('img');
+        var alt = thumb ? thumb.alt : '';
+        zImg.alt = alt;
+        zImg.src = link.href;
+        zCap.textContent = alt;
+        document.documentElement.classList.add('zoom-open');
+        dlg.showModal();
+      });
+    });
+  }
 })();

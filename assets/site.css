@@ -671,6 +671,50 @@ a:hover{ color:var(--navy-lo); }
 .example-slide.is-active{ display:flex; }
 .example-slide img{ width:100%; height:100%; object-fit:cover; }
 .example-caption{ color:var(--slate); font-size:.85rem; margin:0; }
+
+/* Survey example photos: a modest thumbnail under the slot's description
+   rather than a full-width image. 220px wide (275px tall at 4:5) leaves room
+   on a phone for the instructions and the upload button; tapping enlarges it. */
+.photo-slot .example-carousel{ width:min(100%, 220px); }
+.photo-slot-text h3{ margin-bottom:.3rem; }
+.photo-slot-text p{ margin:0; }
+.photo-slot-actions{ display:flex; flex-direction:column; align-items:flex-start; gap:.6rem; }
+.photo-slot-actions .photo-thumbs, .photo-slot-actions .video-slot{ align-self:stretch; }
+.example-zoom{ display:block; width:100%; height:100%; cursor:zoom-in; }
+.example-zoom img{ width:100%; height:100%; object-fit:cover; display:block; }
+.example-zoom:focus-visible{ outline:3px solid var(--brass); outline-offset:-3px; }
+.example-zoom-icon{
+  position:absolute; right:.55rem; bottom:.55rem; width:34px; height:34px;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(1,30,62,.84); color:#fff; border-radius:50%;
+}
+.example-zoom-icon svg{ width:18px; height:18px; }
+
+/* Full-screen viewer for an enlarged example (native <dialog>). */
+.zoom-dialog{
+  padding:0; border:0; background:transparent; max-width:min(94vw, 760px); max-height:94vh;
+  overflow:visible;
+}
+.zoom-dialog::backdrop{ background:rgba(1,20,42,.95); }
+.zoom-dialog img{
+  display:block; max-width:min(94vw, 760px); max-height:calc(94vh - 4rem); width:auto; height:auto;
+  border-radius:var(--radius); background:#EFECE5; margin:0 auto;
+}
+/* The caption gets its own dark panel so it stays readable however much of
+   the page behind shows through the backdrop. */
+.zoom-caption{
+  color:#fff; font-size:.92rem; text-align:center; max-width:60ch;
+  margin:.7rem auto 0; padding:.55rem .9rem; border-radius:var(--radius);
+  background:rgba(1,20,42,.92);
+}
+.zoom-close{
+  position:absolute; top:-.4rem; right:-.4rem; transform:translate(25%, -25%);
+  width:44px; height:44px; border-radius:50%; border:2px solid #fff;
+  background:var(--navy); color:#fff; font:inherit; font-size:1.6rem; line-height:1; cursor:pointer;
+}
+.zoom-close:focus-visible{ outline:3px solid var(--brass); outline-offset:2px; }
+@media (max-width:560px){ .zoom-close{ top:.4rem; right:.4rem; transform:none; } }
+html.zoom-open{ overflow:hidden; }
 .photo-slot-icon{ width:40px; height:40px; color:#B5AFA0; display:block; }
 .photo-slot-icon svg{ width:100%; height:100%; }
 .example-nav{
